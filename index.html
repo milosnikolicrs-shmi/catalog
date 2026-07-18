@@ -1364,6 +1364,17 @@ function showHome() {
 
   const pct = k => total ? (byStatus[k] / total * 100) : 0;
 
+  const albumNames = Array.from(albums).filter(a => a !== 'Unsorted').sort((a, b) => a.localeCompare(b));
+  let albumsHtml = '';
+  if (albumNames.length) {
+    albumsHtml = `<div class="home-section-label">Albums</div>
+    <div class="recent-list">` +
+    albumNames.map(a => `<div class="recent-item" data-album="${escAttr(a)}" onclick="showAlbumDetail(this.dataset.album)">
+      <span class="r-title">${esc(a)}</span>
+      <span class="r-sub">${catalog.filter(s => (s.album || 'Unsorted') === a).length} songs</span>
+    </div>`).join('') + `</div>`;
+  }
+
   let recentHtml = '';
   if (recent.length) {
     recentHtml = `<div class="home-section-label">Recently edited</div>
@@ -1401,6 +1412,7 @@ function showHome() {
     <div class="home-sub">Song Catalog</div>
     <button class="home-new" onclick="newSong()">+ New song</button>
     ${statsHtml}
+    ${albumsHtml}
     ${recentHtml}
   </div>`;
 }
