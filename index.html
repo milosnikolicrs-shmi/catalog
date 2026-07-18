@@ -250,6 +250,61 @@
   }
   body.light .chip.on { background: #fff; }
 
+  .badge.pipeline-idea { background: var(--bg-elev); color: var(--text-dim); }
+  .badge.pipeline-draft-lyrics { background: color-mix(in srgb, #8a744a 16%, transparent); color: #b0925a; }
+  .badge.pipeline-demo { background: var(--gold-tint); color: var(--prod); }
+  .badge.pipeline-recording { background: color-mix(in srgb, #4a7a96 16%, transparent); color: #5a9ab0; }
+  .badge.pipeline-mix { background: color-mix(in srgb, #7a4a96 16%, transparent); color: #9a5ab0; }
+  .badge.pipeline-master { background: color-mix(in srgb, #96844a 16%, transparent); color: #b0a05a; }
+  .badge.pipeline-distributed { background: color-mix(in srgb, var(--final) 16%, transparent); color: var(--final); }
+  .badge.sokoj-filed { background: color-mix(in srgb, var(--final) 16%, transparent); color: var(--final); }
+  .badge.sokoj-not-filed { background: var(--bg-elev); color: var(--text-dim); }
+  .badge.cdbaby-live { background: color-mix(in srgb, var(--final) 16%, transparent); color: var(--final); }
+  .badge.cdbaby-sent { background: var(--gold-tint); color: var(--prod); }
+  .badge.cdbaby-not-sent { background: var(--bg-elev); color: var(--text-dim); }
+
+  .palette-row { display: flex; gap: 8px; margin-top: 10px; }
+  .palette-swatch { width: 26px; height: 26px; border-radius: 7px; box-shadow: var(--shadow-1); border: 0.5px solid var(--hairline); }
+
+  .credits-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .credit-chip { background: var(--bg-elev); border-radius: 8px; padding: 6px 12px; font-size: 13px; color: var(--text); }
+  .credit-chip .role { color: var(--text-faint); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; margin-left: 6px; }
+
+  .album-header { display: flex; gap: 24px; margin-bottom: 28px; }
+  .album-header .cover-img { max-width: 220px; margin-bottom: 0; }
+  .album-header-info { flex: 1; min-width: 0; }
+  .album-meta-row { display: flex; flex-wrap: wrap; gap: 18px; margin: 14px 0; }
+  .album-meta-item { font-size: 13px; color: var(--text-dim); }
+  .album-meta-item b { color: var(--text); font-weight: 600; }
+
+  .track-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .track-row:hover { background: var(--bg-elev); }
+  .track-row .song-num { color: var(--text-faint); font-family: var(--mono); font-size: 12px; width: 22px; }
+  .track-row .track-meta { flex: 1; min-width: 0; }
+  .track-row .track-title { font-size: 15px; color: var(--text); }
+  .track-row .track-sub { font-size: 12px; color: var(--text-faint); margin-top: 2px; }
+  .track-reorder { display: flex; flex-direction: column; gap: 2px; }
+  .track-reorder button {
+    background: var(--bg-elev);
+    border: none;
+    border-radius: 5px;
+    color: var(--text-dim);
+    font-size: 10px;
+    width: 20px;
+    height: 16px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .track-reorder button:hover { background: var(--bg-fill); color: var(--text); }
+
   .song-list {
     flex: 1;
     overflow-y: auto;
@@ -752,7 +807,7 @@
     font-weight: 600;
     padding-left: 2px;
   }
-  .field input, .field textarea {
+  .field input, .field textarea, .field select {
     background: var(--bg-elev);
     border: none;
     border-radius: 11px;
@@ -763,9 +818,9 @@
     outline: none;
     transition: box-shadow 0.15s, background 0.15s;
   }
-  body.light .field input, body.light .field textarea { background: #fff; box-shadow: var(--shadow-1); }
+  body.light .field input, body.light .field textarea, body.light .field select { background: #fff; box-shadow: var(--shadow-1); }
   .field textarea { resize: vertical; line-height: 1.65; }
-  .field input:focus, .field textarea:focus {
+  .field input:focus, .field textarea:focus, .field select:focus {
     box-shadow: 0 0 0 3px var(--gold-glow);
     background: var(--bg-fill);
   }
@@ -981,6 +1036,9 @@
     .spec { padding: 11px 10px; }
     .spec .v { font-size: 12px; }
 
+    .album-header { flex-direction: column; }
+    .album-header .cover-img { max-width: 100%; }
+
     .row3, .row2 { grid-template-columns: 1fr; }
 
     .lyric-head { flex-direction: column; align-items: flex-start; gap: 10px; }
@@ -1041,7 +1099,7 @@
 
 <div class="topbar">
   <button class="topbar-menu" onclick="toggleMenu()" aria-label="Menu">&#9776;</button>
-  <div class="topbar-brand">
+  <div class="topbar-brand" onclick="goHome()" style="cursor:pointer;">
     <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADTED8xAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAA1VklEQVR42u29eZTdV3Xnu/c+v9+9t6o0j5ZkS7IsWZ40epIHjAdoM7gxJMQdGlZIQppeWWneS788SOc98iBNkqbprH4hzeKFhLQhjAlTTBgajAEPkm3Jk2xZlmTJsuahJJVquvf+fufs/X1/nN8tOQRsVZVtWZXzWV5etoaqW7/f2efsvc/e302USCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikXitw0zM6TEk/mUtehZhEf6nvyLpySQm/n4v/2TDd5LXJauNmEF6RK/1N5gewZgRYTMQUa3RvebS88+b033L1RfOndFDrtE7RF/45n0PPPwEMROQnlUygIm28cdVXat3Xb9m0XtuXX7TqlmT6+iuZ46FswbXunt99wf/+//60j88wMxINpAMYOJs/MwGEMuN6y56zy0X3LRi+sxJLii8Lzmvs2uQmZl15aE3TLrtd/52+77+6q8kXntk6RGMNt41IMvy37h99e/fccmMBkrlgcF2VqsROYFYWQCqIQy0tKcnv/DcSdv39RMTpfWfDGACrH4Ai86d/Qe/tu5NKyd31WlguHAiWb2LiMTVDGZWMmUkTpiaTd8/0CJKqz8ZwIRY/QTMnjnlzz5w4xsv7m4G8saSOWbHnENLIzMtWZyahtZg3jOjNTjce2yQkgW8lh3a9AhOG4DkPbcuf/2y+snBli9LBpzk4nLTEgQLnogJAoOSE+hjTz2357gn4uT/pxPgrN/+mei9b1vz/n+1pO3BLmMiGCx4Zna1uoGYmcWB2IwaXZP27D3yya9vbgZKSaB0Apzlz0gYwLWrz//Qr1wyuduZwbnM5XUQAQCR+hKqBiMiDb5Rzw4e7P3Q/7fhsX0lc9r+0wlwVu/9RDDkmfs3Ny2ekhdecyEDswafZTnXGmRqALOzUMK4u5E/uXX3Bz+94dF97ZT9TAZw9huAsBmuvmzBjZfNVggzMzvTQCDTEP+Ma0zVYojIwbe/ds9jf/b1rbtOWFr9yQAmAmZwjn/phiWzp3W1iiDEktfVtyVzZAYYwELE4lj9X3xlw59/d78fuSxLJAM4u71/ZgMuWDBt3UWzi3YbYIgws8sb0EKyjFlM1UJBGv7szp/8xQ8PgUXI0upPQfBEiQCIli6YNqOb1BiAWbDgiSAiBDIiA2WOPvethz/1w0PEwhQL5BLpBJgQ/g8RXXvx7EZGgSiv1ZmMRKAKMxJiFqjfuvvgp7+zQ4klrf50Akys3Z9qmZw3Z1KW1wjQ4ImFiTjLyWVgMSPHfPeGZw8NQZjS6k8nwAQyAGYAS+dPWbZgShlMXEYwC4EyxKstmBFsqOkf2tqbqmrTCTAxj4Cp3dmUbqcazIyZmUnYkZn5NgEuywaHWnt6myBKBT/JACYgAEIIgBEpEWJVBAuLqzELVMtWq1VaWv7JACaqARg0EIm4jAiE+A8558yUncsbeWr9TQYwIdc+EZGaiXMibEHVB1WvVjKzaWAmIuvuyrobjlJzXTKACYmqAmQKwOI9AMxgalpCfdlqTulprF46kyjpASUDmGgHAIjo+aOtnQf6YSEEzWq1LG8IsW8NxnIgIq7Xu+540xqJ/5OeWjKACeT9EzH3Devug/3OcQhlCCWzEDvOalmti4WzPC+C3XDVxbddt8QM4tLzPMtw6RG82PYgDNDsKfk1l8wGyDQwgVkky4UZxOIcs6uLX37pRf/w46eabS8iqf8lGcAEgYlBxGRvunK+Y/jSi3MEc+JYHKBmxkRFu3nurPqlq6/40fqtrXaZbCAZwIRiuO2vWDpt/qxusDQa3WYGMxaBGRMRjF1GIaxYMnnl2qvu3bRzcGjIJRtIBjBBvCDmIoAJr1sxR8QxMTSYBmIRdjDizJEZu5ovhy+Z71asuOThrYeP9/WLcIqKkwFMCDeI6MCx5uVLp587szuEkOeZiHMuY5cZlFkIxlBQ1mq1lszALdetGtLGU9uej/aTDoJkABPhEPDt4rpLZ4pzzCxOYGrBCKS+ILDkNXECQ1A+p6u48Yol+bRzt2zb0y7K5A4lAzj7jwHmvUebF8ztWbZgEkkty+u+LMQxEbNzkuVRMpGJNWip7MqBW68+b/WVV933yM7+waEUFicDONsNgILR9j191yyd3J2TIRaGRmU4ASwKRgMmIuKYsoYVw8vn0urVl+4+Wu7df5jj30gkAzh7D4GTLdt3ZHDdRdO7u2qu1mBhKABY8EzMTszgsprLHJOBpGi1zp/u337rNYM26dEndxBROgqSAZzdwcDeE+WBo8PXXDyrUZN2UTIzmbksYxECnMuIYp2cRKmIMlA3Tt509QXLLlm56Ymdg8Mt55INJAM4OwGRMD/X295z4OSVy6ZNmtSlRi7PRNjUCCTOoRILAjsnIsKs5tDuu2rZlBVr1jz41P4Tff1pfFgygLPZBoR397Z37jmxZsnU6VO6iBwzMQkJAMCIHSMoM0lWM2KCGaTdGl46w9548zV9RbZl225KGdJkAGerDaDyhdY/eWjWJFm+aHq7DLEamsURwOw4c2CJo2KYxTGLy4vCnzu5+Fc3rOLuuU9t3dUufXKHkgGcxb5QX8vWbzk2OdfLlsxg5zSYMGVZDvPQwMREBIKwEDPMRFw7IPd9t169eOUVl9/78I6BweEUFicDOHttgEqj+7f2HTx0YuX5U6ZM6lYDccyNEpGIc6YKAARxDkQMA+Xl0MlLFtRXrVm5a//JfQd7U4Y0GcCrCnM1yDouuzGvPUTtaOZth1o7nz+2ZsnUmdN7iiIQwCIiDqbMIlkGNTCZRT05VeNWq7lkht7+pmv7y/zxLbuoU3qdSAbwyq17fqG/AeCFvkfHHka9BrmTHr3v8YMze/iSJTODUiyXMDUYJHNEZKbiOJ4QzKQaSq9dNnDzuuUXLLtg4+Zdw80yhQTJAF6ppR9VruLyyvJ6vatrxcUXXLR0URlsuO1hOvK7Y8hRxpDgZNvu39I7NdPVy+e6Wq0sSxFhYQaDIE6YGDACEZgBFvYBUg6tu3jWJZdd/OBT+/tODopIElh5VdfGhPd2iKoRRQvPm3/5igtuvubS2dMm55m77KLF06dP3bZz38Gj/cf6mz99cMveA0cf2/x0CCGagZmN6nsJk4GF8Par5v7HO1bMnTW18JpnmctyAtiJEBHAwi7LuZq2bSyOyBr17LmhqZ/4woNf/95DlNTVkwG8XBt/XPrnnXvO225ee/tNK5bM7cqpdJIRu1ZrGEBXV3eWZWBWbrS556eP7vrHex554MFHT5wcjE75qHySGBIQsG5xz4ffu3rZ4rntUmt5nuUZAGEmJgLEOediwpQMKuKCL6f2NPzkcz/x5cc/88W7h4vgRHSUFphIBvCzq79Wq93x1nXvvnXV+XN6mNmrqhETi3NEShrY5SzCzAKrZZxlmXTPeGRn/3/77F0PPPhYjE1HpfjMnaEy8yfL773zstted0EAg4hMa/WGiIMZE0SYRSTLyIwAYiEmZ+1J0+b86Fn7Dx/7u8O9J8ZwCr0SrmNnElqVqvqZ2CnFAK9F4li7xQvn/d///i13vH7p9Aa1Ch+08kTim4xvU5hdVofBQErUbpehbC6eXXvz66/omjLjmR17Wu1itLFpvCkbKHDv5iOh3Vp+3jQnBhYmhhkLEwsAivNlAJgRERMUrGXr0oU9a1ZfumPfwIHDx85UW9kLo6aRH308YVIygFd19Zth0blzP/L+W29aNV8VpZKqsrCImBozVx294oidmRExyDT4PG8YeGi4KX7o9VcsXXvFFZuefPZE38BoY1PECmrijTtP7th9dM0FM2dMnxQUIsKdhJRp4CorxYh/BUSctZutxVPKd7z1+hPt2hNPP0evetHEiOu4eNF5V629ZMXyhR943zveesvV9UbXgvlzW83m4HCLJkredqK5QPHlLVww58Pvu+XypTNLJSfOiRgsq9VMg7AAYBHnRu4B2EyJmTl2uDBgIHLMjXp+qJj0yc9//++//ZMxxKZMRMIwLJ6e/+/vvPTWq883V2Mow6K6BEyFJcvrRAQyJiZAhMVJT7e0stl/cdfOv/ryPf1DzVcnJODY1UC08Nx5b7t5zdtvvGTh9My06G7UWWSoCFlj2oF++toPNn7p6z84Odg6405aOgF+3uqfP+vDv/WGy5fNLoKJMDGTVC5HFLiNyp7inGQ5wcyUCIzq0GeufCQD2kU5NWu+4Yaraj3TntyyrQw26v5GkAj3tfT+zYen1nHZ0jkAQNEJEyKJVwaARZ8oig4xW4Dj1rE3XH7O6rWr1z+xt39g6JXOkEq18ct73nHjR95/861r5k6pWbvV9N6arXK4WZRF2w/3T85aN1yx9PK1q/bsO3TgSN/Zfoc9cQwgbuZZln3w19/4usvmNgsvzOwcVFWVmU2VJSMCMbEIiTALsZhvAcQuA9Q0aCiJWLIcMAKCsTZP3HzNijVrVj6wacvgcGu01TtALJrg+58+dvDg8TXLZk6ZVGsXniwIs0imZmrKIiJZFNwN3lsIZihbzYvOcatXXrzvWLFn/9FXzh0SEQNmz5r+/jtu/J23r5rVsGarbBeFKtQIgA+qSiDXLsrBE8fnT3G3veXGw0d6t+0+clb7Qm6Cbf9vu3nVO2+8yEzjTwcWQONvW5zdKI4oXgmTWiAzkQzEGkJcrDBTH1jE1OLtlYIGjh9eOm/KFVdevnv/0f2HjnF05UcVEsSiiQNDT28/dP6s2tzZk4OSiIAIMOaYmCJQ/JxMzEKOJW+Xet5UffMNl+bdU57atjceay/jgouZHgDnL17w8d/9pbevW2ih3Wy2iIkkY5eJcwAxC6CqaqrO1bxXF4ZvuG7tw4/vOHx88Owt7XYTafXPnTn5d999/ezJNSUXUytVewpzVus2U2bHJApAXChbvt1mcQqQOGEmljjlq/KFxLlaF5kSQVzearXmT+Xb33rTYCts3jqW2JSJRHh/X/mTJw7NaGDl8nmQPIRABBaxEEii/yVxLAEzAQRVH0iKvpvXnrdq7WXrH39+cKj1cilNSOX18evXrfjQe667+sKZrXbhg7qsRuKYHaFzSx7FUquCEsfMRRFy+MULz/nxQ8+UirPUFZogBhA3xatXnn/btcuiw0PMIhkRkThxNSJRLQHzRburnjnnhpqtol24TOq5I3FmFF91fM8GwIJpqMqDQJLlReGd77/5ujVLl57/8KNPt4owtgxp02P9luOhNbxsfk93d0PVRITiyGHvSZiYTM1UmQVEZsHgfNFeNtutWHHxozuOvSzCW9HtyWv13/iVmz/83uvOm5a1S7NOgMLsVL1qIGYQV9FHLCRkNjNxrgzlubN7DvYOPPN871nqCE0QAwAod/Ket1xx4cI5qogXNiyZOMcsvmiaaTDKslq7bN//yDNf+/7GL33/0bvu3frQk7tO9A111XjG1B5VU9XMxQZfApGpxmoFFiYYwcpgoT14zZoLV69d/cDGpwcGm86NKUMK3rSrf+fzx1ZdMHXGtB4fQGZVKTUxACaIiMGIRMQRGSDNVnvhNLv52kuGtbZlx/7xhATxlDt/8YKP/ofb77hhSY21VQRTY5G4AagGs2AWnNSIyVSJiMXF0yk2O7RbTRGRLL/74R0GTifAGdr+mUG0fNGsX7vtylruWBxzFpP9Uf9d1WsItTzvPTHwXz77/Tu/t2XrnhNH+lrHB4s9R4Y2bNl/36YdAwMDi+dNnTKpxwAnjplUNZaIiriqJIKJyUCuNTR4/tyeK65Ys+fQ8b0HjlYJxFG6Qyy851jxwOZDc6bVLzxvipKYKQPErGVpai7PhEWcQ9SccOKyzBtN58HrV5/XmHbO088eaJd+tO6QxCtA4huvXfsHv37T6y6c6kPwwUQcMWkIpiHmNplEpNoOYuUSAeyiEoz60rNkzNLT1Xhw866TQ8XZGAlMBANgZhAtWTDzDVdeINUMO2ZhU0/MqkYkwnz0+ImP/eV3N+44ziLCxJ1xd8Q81NbHnj268/kDK5fOnTF1cgCpBRFHxCwSfXFiJmKAGJZltaIoz5lEb33Durx70pNP7fAKGVuGtKn3PnFoaq6XnD/DuVwR78RIslrwJTODDKrEROJIFbBWaWj337h6ztrLV214cm//YPP0v3XnKkN+845b/uj9t8yfwkOtUtViCG5m8VpQTYmYhJkZBnYS437TQMSAAUadlrdGvf7wlj37jg5yMoAzaAArl827fuWiTpzGBCIQgmfnADjnPvete+/ZfNiJxHRQXGhxvTGTiOw/1nzwiV0zJtcXL5jhfRBx1LkTRRX7ORGp6ihApTcph95w/WWr1666/+EtQ832mEIC8sb3bz1+4ODxS87rmdxTa7XbzglLvBRzRMQiZgpAg4eaMIizotW6YBavWbFsb+/wvkMnTqetTIQNmDt7xvt++ZrfvHV5V2ZloE6EyyFoqCaBMwBigsUiJq1KAlliMgtMIyOhzKheyw4cPvbYjiPJAM6YBRDRL9948UXnz7Vgzrl41wRmIjEzl7nDR3o/840Hh8tq8NHPW4sQ4ZPDfv3m52dOylYsX+TVOnVg5IQJBrMYXRMQl5sStYb6ly+cuWbtmo1P7OzrHxxL0QQRmLcfau547ujyc/I5s6YYCQFZnoMQd2VhMQ0haN5oEDM7R+KKIszrLv71zauG0fXE1j30i8sTOrlOOn/h/D/93956+7qFDHirfgfE7JyZIno+TojYYGoAOF7PweCyjIjir6opMzM7EGqZ7N53dMOWg2fjlLSJEQQzEb3xqguWzJ8eEFN7JiQAwYLB6nntkSd3fPehvXjRtElM0Xilh7fsmzO9ccmyhWosDJHo9ZIIc+frg4kQ9R6y4f7+hbPqt9x0df9Q+cyze8eRIfXrt/TO6MlWLpun8daCiUXMh3hOOc7YORATCaDEVAbUQvPGtYsvvOjCR7bsHWr+nNK9zhUvv+6qSz747uuuXD677aHR2Yo7RRVrOwslmJklBGWi7q565iR3WVBlYhIOIRBgZnEYVCwXzzJ5+tkDDz59iJMBnEFet2rR4vlTVC2ugLizmWkIPhN5aPPOjduPvmSqLlb9BuNNW/YsPGfKeXOnmcVQmJhjLaeIiFqosvXQWFRXlOVUV7zhdWuyrilPbd05hqKJTg2pPfBUr5ati5fMznNqFwWZiXBMvccgtXJL4pJkg9SoGL586bQVKy/auPVg38lTRRPRtTNg1szpv/nO6/+Pd65eOKvRLhUGIphZvB+M1qUhBF/6sjSznp6uXXsPfvfezZu27G57nTNrqsFUA1McEu7M4sxMCyE45u3PHdqwNRnAGT0BXr9m8ZIFs9SqhIwwG4FJFFqrZVt3Hti47QjzaeWqRbgM2HOg9/VXLGvUc5hVzY1ETqIfDOcciVNfRm+BhYORNvtvuXr56rUrH9i0dXC4PWob6GRINz7bt3P3kZWLJ02bVAuKLM9ZGJ3JNGZKAJPAiMmxOLAbGm4unsG33nRVfxtPP7s/Rg6xgHnxogV/+oHbbr96niOUZWDnDEzEqsqZY2INniw6NoCZc/LNux/508/d+5PNhx7ZfvRHD+30vlyxbL4TJiY1izNyiOJhoHmeb9t9eEM6Ac6sAdy4ZvGSc2eqEhB7GrN4RDNnNSdPbt+7afvpGkDcjI8NtOfP6r5s6QK12MwVr4dZgzcDMznnVDVeNcRskQGt5tDSud1r1162+8Dx/YePj7ZoYsQder63vXn7kcXn9CxeMD1GoeKcxpXXqaAmZnJZp22NFW5Oj9287uJB63l6xwHV0KjXr7vy4g++68orz+9pF4FcRmQGASFWvIo4AOKy4NX7kOfuRP/wn33+x1/40fZmCRER4WC0/fmjV1w8f97sqUW75Co1ZDFGB6jRqD2z69CGpw8mAziTBnDD6oWL508rfSCCSLzANcBglGe85dn9m7YfYT7dLTkmNPr6h65dtbinqxaXf5Y5ZiGwqXZuaqP7EJ1smHpm1xweOncK3v7WGwbaGFvRRLTAI4P6kycOzezmixbPMEMIgWDiMu6kekkYZsRkZrFyoQjkwtC1Kxfe8Prrb3vjtXe85ap33bRk4fSsHQggIzYzVWV2BmMSGEBQs6ChXssPHT3xsb/6wfpnepllpB+GmYPhssXTlp4705fKXMXBMDPVEEIty57edfDBs9MFmjitPZ32pU6TVaxrYAEpkXX24dNdh7Huf/vevq27DteyLARVVfWBiFiYnRCzAb703hemAaYavBkF71myoXZA397/5303/vlH3jd9ct0AN8oRwgYI00BBH/3Stv/8uU39g808c2qGzqWbEcMIxABzVmOXkWREVKgThHXn6c3LaO18y1EMe1M1kjx4NSN2DmYEMSDqdjFxnsnjT23/T5/89mPPnRSJmf5/+njNnGQcS2jj/UiWgYlFVBU4W7sCJpABMANVltMMMKsyf0TO5WPYnJjZQMOtUlxGzCBStaLVLos21DSEmI5kcWowM9N4N8RmIM5aJQ0c3PXL18z7zH/5nXlzZsTonEdnA8RMgfnrDx7+yJ2PHjra11XPfQheNajCDMyguK9XLomqqXGzbUdPNA8ePtk3WLY9kdSMczUQMUlOJMQS2zJ9CE4cwb76nQc/9Kkf7zjcFv4FPdDiJKrAR00xd2pHqa4FkgGcYQOI763Ttwoi07jDkap29n4ejQEQET393JGYiqlEDjudKwYN3qtqCMFMq2u1zr1BHCNpWc+R/YfWzqNPfeTX111+qWpnssxofCEGRPjeZ/p/+5Ob7nlkX6Pm1ABmxG4sFrAYSFVLX3iFV1JzRk6yBoFBorHGL1b4wYKvPJjS+3o9P3LsxB/+j7s++a0nBz2/SMsbzLwvAZjF/gVTtRCCBq8+nL19YRNKqD66PWYW/aCg3gCYxqLOUblAI+w5fLLZKmBazT5ispFvQRCXOeecyyonzCyEdtAAzuJa5yw/cfzERVOH/uajv/pb//bW6FePKjBGjFuFnztW/F93PnnXT3Y0MmZiVYOZ+tKCmikMoJq5unGmZqYwgxqYxWBqFkpvhthrUBRFCKG7UX/qmZ1/8Of/8KMnDkan/0UaPlm4SvtWFq5qgYiCajj1eJMBnMlAOE7pijU7I3o+IBrXBaVzGczUFDDvfQgBpiAQi/pgFgCqwgAmEhZXgxmg6kvTACLO3PBwW3t3/sG7r/rMx3971vTJZqMPCQzCNOzxR1/e9v9+9fFW4ZnZK6FKY4hRrFDIiB1YKucE8L7Uoog5n071B8S5PHd33fPY//kXd2/ZP/xznf6fcxYRc6ejmmM5VZSUFGFJLtBrwAmiqDxFpyQ+gUp3p3MHPOr3FMfBZ1lGLFHdmTtZGMlqpmamwqKqBIMqNMCC+RZDiRREIpnLc3WNgcN733xp96f/868vPm9e7AEYlWXGkMAz3/mT/X9058aB4TLL82iLqmYQA1RD8EUoC0M0WgDkao0YHQFQVRhE6HPf+OnHv/hQf8G/0On/5w4hk5qKiKqamgYlYherlViSAZz5IwAgqy5oRlRszCwYjEeZBRr5szDzZRn7s0aUoSjmE33bF4UGLX0IQTUoYIDCAgymRkYUAgASpxZa7eHDBw5dNm3ocx971ztuvTrW5I0tJLh787E//tuH+wZaJORDCCHGxhp8K4QQPx6LABa1J+L3MjNVY8YXv3XfZ767zV7K7fmZAzYaT0ykBg3ioldEWZZVfafJAM5sGpRgXC1QdJxygMAydicoVhOAEXwIIcToT8vSQtVKKcKNWtaoOUCDasz6MzMo9pSVUG8haFk6l+WNrqLQmXrgY//uug/82q2N3AEYlc7USEjw4yePfeobjzNnBoLUKKuDM3ANJDFtpT5oCKZqsXCNCKB6Lg9sevpvvr+dWZhGJ0Aab8TNjBCbX6qa8hHRuGQAZ875IaJ4ynd2yhfKoMdAYGwuEEWhc4OZjdz+huCZWfJMNbTbzfWPb//OfU/2D7aFQlm0vfeqnplYmMT5oqmhYHbiGhoUzG3PxbG9v/eOi/76T35rzsypZuZGqbUGgzB/b+PBu+7bIXmXcUbkABLJXVaPzg8JsXNZXrdYx6PKTAcOHf3rux4LUZV0dBkBY2EXVU05BgNWeVYGpuQCnfkTwMwsNvPGbS8e1qbqvcdYs0DRBExDp1mEavW6uMyAUJb1Wu2xrXv+06d+/Md/+/AHP/mdjVv25XnmfUwPFqEsYMoiMIV6WCWGSIRgfOzgvnULWp/+w1+9bPliNetINp6uxYMQwJ/61pOP7TjosoYP6su2Vrna6l7C1BQqzrGIGWq5u+veLbt7C6m6/0f1fNmJqKovS9NAZLFbQJg6P1QygNeIG1St/JgcNBrz0udTFuCcc06YHcy892YK0xACC+853FeCMuee2T/4kc/e+8MNz3R31aqyUyCEgjljFjBAGj1yImKGMp882X/Z9IHPf/Qdv/LWq81QKUifdjwgTINt+8Y9WwvvFfC+UNMo6xJCqAoWABCFEPI8O3j0xD2bnh9RPhztIRs3larhjjjuNN57MwMlA3gt+EFGce+v7sKqf8dgQMfyBeNXgZpBVc0CMUMt3n8JCwH1Wo2JDCbMg237xJcf+etvbhxutp0TH3xUGqq6aYlD2dJQdJYLWLLhZtEYfO4P37Xyd3/jLZO6GzaaW4JYqPPg1iOPbN2X5xm7BoGqbKyIOIlyYKZKxJnQw5t3HR7Q6pmM/hw0VWg45W+SdRoKiNNN8Gti/SPW6mpc7pXwMqL7PvYwWINqCBaCqWkI7CTLay7L2MXS6MqbMICZ2sp33v3sxz+//sChXiZTDT4UZiXgVb1ZMA0WAjE7yaJtNEto3/4PvHHWX370V8+ZMz3GuKf5IzNREeg7D2zzASzOCJUqDACzWOjG4sRJq/DrnzpAY74V6ewpZqHSy6BTMgFnLxMqC2RmMS8B6gxEGon1xmoAqFRAmMRVmVY1DV7EmVfTKsE6EnxH7f/7tvZ+6C/vX795Xy2rBDcJMC2J438EBI1aOyKUOVLO+nqPrJtX/Pffe8vC+TNGYwMgosd3HH12b2+tlhuiaxZiP9nIpbgIDw41nz/YN3IwjiHEAsFlGYvDSIYNEBYnAk4G8BqwgHgdg6ocLjrV4HhbOR7DgsYa/bjREyGv1YhIHAfvo2AO4WfTlM/3tv/kS49+b/2OTMBkZVmqDzALoYwV9TAP0+hQMcPV6v39A5fPKT71wTdfuHD2adpAvEkYLuypnYfiuD4RBxi/oBenaLXUh1arVZR+PI/XRaExwshFo1Q9N0QpBjjzMBm0cwFAMCNY1RvJNN40ReyGITbVWHfHzBrMgCgo8rMpQ4MwDxX2p19+6r9+4aH+oZYTMgKgQkSkFgpoYGYjo8q6IE6areLCqc0/ev/158ycFL/LaXw0IqIndhwpgsY2BueykUCok6aXw8cHBttEIxpvo10oImbmgzcYCHGsTjx/1MLZK447kbJATODYo1EJ+BETkWqIc+/GuvJJnFMNplb9QmfOKTPnee0X7dMxJFDmux4++Eef3XDk2GAu6ssSZLBAAEIw9aii9ph1EgOGhtsr5urHf/t1Myflp+W7gYjo5OBwWZQj0X80Vw2qaiTCgsPHm6VFPZcxEvcXVCWv1b5vMNUXZtuSAZwxF8hABjNimBrMQFZl6GJ4MNbYD6YwBQwWmMlCUO9JEfVMKhfoF/kngAg/tLP/d//H+p8+sqenKwNZLGdmBlkgmHOZmTEkTiogloGB4WuWTfqP77oq6q+czufUEMiMRzTq4g8fP7ka03jHTlrV8oLYVtqpM4EpxphWSgbw8mLojJ7oNPOZkVkgVKW8YzUri7ViGoJ1tKMJVXQpjiXWQr9IbsogwvtO+j/+yjPfvGdbxhwl2IL3IQRxGYGYJFbZGBCCF5cNDbduvXrRmgtfOhiIfshwyw8Mt7NMOmEuYvOuy7IQfAhhvPVqQJzx2um5i5IQvnMDn2KAM38AaOX7m8UlSqYEHskOjTkLFEKpIVS3CRpibNHpfqki7xf/+rGYuaX4xD8898d/++jJvmGBb7fbFoKGEqbEUPNEgCoTucwFb3Vr//btK3rqghfVM4pr78iA33NkQJg19oY5V238VXUgxj94WNWiFRDFGlvAKN44n72J0AkVA5hVmR8bKYiLPQKGMWv2MUuM/5jJzDNLvFuIKnHCXBVCvtTXj4LKxvzdx49/+M4nHtt+tKtRy+t1goQQQlnE8TQGuCyP2dWi1b5y2Yy1F86KahQvtTrhtWoKYBZTo1ikYOYyJyLZ+DKVUbLF4kWLVU+ama1zHiQDONMukBlGOuMrA4CpGTCeIzpWFLuofSKZsLBhpKrHl55O+91HZ1mEH9/X/P3PPfPTzYe7GnUF2GXMjkWExTlX1ZyJGGC+/Ya15/JpONmxUjtqGJp5FgKBnYvCb2qYNbWeM734YfLiriB1Llvih7FOsXUMuJMBnHkDsM7LGVE+i2vOTvUEj+EEYHTEwqtlyNU0uxgOjNa3jhnSgcI+9pVn7rp3Wybqy0JNNVSdtQyGaggFoN4X1yyfsWhWDcBL3gowS9W4bLEDrGrdiXWBPY0sH5cIDoegGLlw7PzXC6tOkgGceRuotiSr0j7M8eoeY96hmIhYDAaDaTCoIeZqoli6Eo369I+SJ83A//UbO3/6+MFaJsF7g7GrBB1BxOyIKaj1NLJz50yil4oz0EnRojoHYmsEmcXjK0pZjefZYqQetnrUnelmZhY0JAM400FwlZ2I+fRTOkEUxavGdVkPJhCiJlSUBhIiMvWmamN69wYSpmFP//PuPScG2pkTJ865DICqcVUbLSDq6qqtXjLtJaOMqhOIKwHzSiDGjKNIDGycE5Wq5Gp1ylbeJjH7ELwPqSXyNWAAlataVW9apwsWZjSOLDhAgHEs4LFACLE1mGEECJNzY3Qs4k3Z9oPN+546HOvzKy8IVQ9P1XECmzWpdpqnlanCqvVvpjF5D2hHTJfG7ArGpppOArSqNtHYIWeq6QR4rWSCmM2gPpgqWYzYoCOB2+jJHAsB0M5UeSIGM4AAUxlfKxQTg+iBZ/pKcOzRgprh1FwCYlbvT3PnRggavCEmQi1GP6aBCcRV7eZ4NphTyYWqNo407jPMSRjrNfCTxIUakxNRGYVjaohMbcw1u4vn9DRqWawrFY7pDoMpYdRyi7+ItgdJdiqTaGZa+dZaqc2d1reJzgmhI4HVidSrLBiPd2ehaoZxJxUECyHALHPZ2XsTkE2MXR9A32BbDWomnTmejFhdM7KdjoVZU2r1WuZD6CwCjCQEnQiTvRxlMNDgnXMiHOeQmnrmzAD16qmM5QYvfpuNWPRafUQQouMX53jFEGi8Y0xFHFHopNbIYMRgFg2hVZTpBDhzBkBERFv29LWK2LpVJSuscoGiouyYN2sL3kdhBQBSXTkbw2KBENPYDSB+nCXn9GROYt12JbJAEkKI1quGoihO6yEAZEoIiJfKUbA6dq10ZFLHngUCQvBmqupDKIOWQTWO02y1i2cP9NPZ6QZNhBMgMtQszOBczP51QmACwDGKHatnRUwW5dHjRUCcIVyVGquOubwybtWZ8NUXzc6ECh97hZlZSIQMwRdExI7L06vjr3RLCYJqMAw6Y5DGmQWL2YWggZg0xOI/FhFfFs5l/YPN/b3DRHQ2dgZPhBMgOjgHjg0fPD6cZ9Ukw+qq1mCwcd5TsrCQMYHIOvJYMdMCYhv7FZswEa1dNuPCBZO9V+bqLg+mZkrEDCZAfThwvPWS+ytOicMgukFc1QXGyj0bZxAQk2HeK7HT+FSZogTFvqMDxwf9+F2sZABjdySYeaitG7YcVq20UaKGleFU5dpoPaCq6QlgQKtFWVXXVO3GwY90oI3en2Yz5Hn2tusWT61zCLGggACEOIgghq2w4Wa59cDwSzpwwiRxuilXY+5VtaOS0lnBNHY/BYZYBaIdwe2i3SrapS/Dlt29pdJZKo01YbJAIKKtzx8/MdD2XkNpcSOMNczBh7G/fCaCCTMxQQM06h+aqQfUNIw2wI5niBlq9fydNyxet2TKyHiB4NWCxWA3ahnV69nhE839x8oX2V+5MgB2zFEHGlG1J7ZHxEpYnJJLHWsMYKrK1ecnVWq2PDMfPTn0yI5jL0s2LMUA4/GCiJkPnmhteubwTWvP88GYnQUFE1EginMRx/iKYmpFiMFS3QqTiXAntsaovlT0yy88f+57b1m8dr40aqTGjh0RTC3LZKR8r2gXPV21B7YcOlngRaabxV8OhtJXI5tiCZ8B/MKDj0cmJIzxMcTJYkwSVDUozMTJ+if39g7q2LSGkgG8/KHA9zbumztj0qWLppelF6lE0xmCn5GNHpVtxfIyAUeB/GopSxSbPc1zJd6jAajX6++46cJfumLmgkkUCF5DTF/CyGVxukzV0yMiew+e/OHmE6ezv8Yf7wUtkSaVYDrFVcvj6YaMY87MQjBAg/dE1NNdf3bP0fue6q10ic9OJo4BxIL1wbZ+64HnFsxcMaUri2JVgBTFONqCATONDYZSudcQZoIRIc5vHM3Gf85vvXn51Yvyuuhw4V0mIhy7dk7lbMzAHAIaufzg0QMH+k93f2UR5xyNVCUwCB39WqbOVeCYGyMoxB4DNQ2WZe5o78DX7n1usABzaol8LTlC+441/+6nO9rBXJaVwbyqaqcqZqy+L6L4H6zjSMTeeHmBIO+Lxbtx4/83b1r9J++++IZFYCtbXoXZe69qBhXH4gRVPC9FUTi23Qf7v7/55GmeW/EiTJzjjlvG5Dp3ADEtNC4F86Ah9oEarFHPh9v+zh9u29Vbnubk2XQCvHp+EDM/tqvPyY47bryAGSFYvZbROHoiYylonC3HLESdak1Ei8CLbPwEmGHJwnP+/b++9PJ5oSG+6TEiKR6nS1T3FQaEGFabc7Whlv/kt3f2Dtnp76+xZVPNWOLuPzIRpvoxxhMDxKxvUKtnbqjlP/+D7dVEvbN6+U88AxixgU3PHi+83vH6C+o1KUo/5hydxktlRCUHVMk+VWIxgxNXTc34eU6zASzZ9asX/dqN562eT81WKEJsJGBiCmWppvVGXY3gzYkA5k2DUj3Hp7797ON7R7HCmAhmMe/JcXQjjIFTDQbjuweI51Wjlh3vG/zs97btONScAKt/YhrAiA08+fzJwda229YtuujcKccGmmPJfxId7CsL75khTNKZBxHvlghwTv55aBlddgPOmTP99msWvn3ttCm1MFwodcZqx6Y1EsrYVQVsZFAEQxnQ08i/es9zP3q6b7QrrFMARyNitagm2sDikNRxmMDAcHtyd75l19Ev/mjnnuPlxFj9E9YARmxg95HhO3+wbc2SGU8+P0ZZzAMnCu+tlrvY/ljlQ4QR1InLhJ3gZzx+M7DINSvOe9d181YtyMx8aY7MjAkENlJTYhFxUcCFiM209F44c0Rf/OGzX3igdwyJxZFEf6dmtToIouR6tIGx+D8AEf30iYPH+5sPbDk6VMYJypgY62TCGkDHBmiobfdvPTbmL6IwGokiVUWIohSCoe0L5+pVw2HH5zHDvNnTbr920W2rpvbkwUeN0lCyi/WYgA8kYmaAEIyYvfdBLXd87OTg3/xwz307BispxlGdV1yJHsakp2FEHqijOjfWUp34lw70lQf6jsZvhImy+ie4AVR5ofG+NDZTmBgYFkTEiYDYACeiaplYrEAwgMVds/Lcf/u6c1ecIyF4X8nIspGwQYQIRM45EQ0aYI4kqIKEyR5+5uiX7zu481jgzrlw+ksfoEYuUyc1qntadC5/QQoVFopTLcbTEtlx7SbQ4v8XYADUuRgdlw2ZQcHiSISYQGxmzgnMiqJcdcmiyxYObtnbu2jB7DdftfC2lT1dXHolyXJWJWKFxjUKsIioWdCok0sFQlfuegea31y/9x8f6yuNxuxbd9ezyV15lJwYUcgjUzKDy4lonHPsQDTR1v6/EAMYJ0wgilUGmkV/XwgwEhZhVnTn/Inff/ueQ4PT6Ni8emHQAHFxmiKLmo0UZ1cV2mYEMWIFoGHD9iNfuf/g9qM+7uVj9q2ndGXTJtVOqSChE21HjQAwJuT6TQbwKpgAcKrzHSAzFWFTn+W5iPhSu/q3r5riijIoyGtgFiMBx1aEIFmcBEMgMg3CMtQuuhv1/oHhb63f++1HT5aICnNjXKFMDELmWEZqnjrxfkcnpop/Ob3MZACj94AMZixxw6eoAmQanMsMzCIEeJOyCCB2DGEBC6jqTBYSUgMszpIoveYZiflNW/u+dP+BbYfLSnpr3LtzbKRhIFa9gRhmFq8CKo0wJAtIBjCmE6Bqp4SagiAsxM4UZmUcvkEMEam6z9iBSIvSuSyWTYtzcVGqaZ7RyZND31i//9uP9ZeoropfFtckXoQFNSZHzICZKYMN1Wgnxtk7xiUZwBklLqs4aQtgcgyDAqbqMs6yGir1WpgBJGSBJTYPh3iRHJtIMrbnDp389P/a9/ShciSn8vKdVDCA4zRAKMVDIFaymhLIUgiQDGCMWyuTMEHY1OJOz0wGYmGAvC9F2EpzTqru2869ATEZkSoycaEsv7Nx79ceOtbXHpfH/4sSXVWAQkIwgzK72LsWb0MgzsySBSQDGMvWSjA1Eudi4T6BVFWDioBZSFiLkGdO1UDGLiMGKUhYDVCt5bxj7/Gv3H/g4d0tIhJ+RTZjEFThHEWRNuMQgxcATgjEllygZABjW1lxN4+6gDG1aOphRCwCNUWcQ8EsIIJqbJkJJeq5WAj/uGn/3z149ESLOvHuK+aqmYYAVThhYgEsdvHH3hgghcDJAMaYBzKlKIdoTHBOhBkStSfMzPIsoyjoVk0EZgPquXvuwMkv/vj5jXvaIxv/K+qHV+UVBAMJR31sZia1wCxqmg6AZABj8YDMjMWZgsmyPG76pl5d7ky1UuAxGDGLM4MTg9p3N+z76obDfe3OULFXfPXFJs1AJJUycOwGBYFgGIc8ajKAf+EmYIB0RuWR10oUwpSUmKUsQlZjJ6JmijC5ke89MvT5e/Y89Pwpjx+vhqGiLEOWsYt5WQ6mVTkgSICgISQfKBnAqLMr1WQ8DYRYCARx4oPWahkgqgCxGcqguXDG9L2N+/9uw5FjTbxaG/+pHJAGz8jJgdkUUV0CwqxEpiGopjeaDGD0jjVQBnWxnoaR506DAihLBdSIxIkFbdTcod7Br244tH5n89Xc+EcYbPrhdpgyKVPzTFWnrplBxDpuUHqbyQBGvbPOneQQQgmq566WOe+DGRsgAnZOfcicMNH9Tx352kO9Bwf0lU71/NwohZkP94fNu47ftGaeDyCQSFRKByBK5riShkgkAxhFWEmExbNyYWu1A0OyvFtc1i6LLM+DgSx01dzh40N//9CRDbuar06q5xdbAf3o8cOrlkyb3N3wAXlWTW70IaiZ5Fnm0vr/OUh6BC/OQFuDmsszcTVVBDVxTsQxWSPnB7cd+/hdezbsasZcz5nyMuIktL3Hiy/cs7vZKjNxXkGkVs0HA4DCV4MMkieUToBROEE7jpS3iOTigreoipznWSbWN1x+79Gjd28d1jO58f+sDTyya6D0O9/7hgtmTetR0zjGtPQ+y/jQyVahdPZqGL5CuPQIfqED1CkCXbds2qSuWqFolSpEdcdPP3f8r+459Oi+Ep2OxNfMZ+Yj/cVTz52YPimfPqnRKkOeiYjkmfzk8X3P9xbMyRFKBjAaGxgqbLClS8/p7qm7YDh2snn3E8f+fuPJ3iaEX4vuhDANtnXzc30W/MzJ9e5GVsvd+i2HvvfoUQUnD+ifx3mJl2bBtOzieV0nm2HXkXZfu5oO85p1JUY+25wp+YKZXcNF2HWomQohEuPzhV7wv6/9bYOJkrOTToCX0wY6yvtnkw8RVeJAKe5NJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCKRSCQSiUQikUgkEolE4lXh/wdRD6ke35AGiQAAAABJRU5ErkJggg==" alt="">
     <span>SHMI</span>
   </div>
@@ -1140,10 +1198,14 @@ const auth = getAuth(app);
 
 // ── STATE ──────────────────────────────────────────────────────────
 let catalog = [];
+let albumsData = [];
 let currentId = null;
+let currentAlbumName = null;
 let filterAlbum = '';
 let isEditing = false;
 let editBuffer = null;
+let albumEditBuffer = null;
+let isEditingAlbum = false;
 
 // ── FIRESTORE SYNC ─────────────────────────────────────────────────
 function initFirestore() {
@@ -1153,8 +1215,10 @@ function initFirestore() {
     snapshot.forEach(d => catalog.push({ id: d.id, ...d.data() }));
     catalog.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
     renderSidebar();
-    if (!isEditing) {
-      if (currentId) {
+    if (!isEditing && !isEditingAlbum) {
+      if (currentAlbumName) {
+        showAlbumDetail(currentAlbumName);
+      } else if (currentId) {
         const still = catalog.find(x => x.id === currentId);
         if (still) showDetail();
         else { currentId = catalog.length ? catalog[0].id : null; if (currentId) showDetail(); else showHome(); }
@@ -1163,10 +1227,20 @@ function initFirestore() {
       }
     }
   }, () => { showToast('Connection error — check network', 'error'); });
+
+  const albumsCol = collection(db, 'albums');
+  onSnapshot(albumsCol, (snapshot) => {
+    albumsData = [];
+    snapshot.forEach(d => albumsData.push({ id: d.id, ...d.data() }));
+    if (!isEditing && !isEditingAlbum && currentAlbumName) showAlbumDetail(currentAlbumName);
+  });
 }
 
 async function writeToFirestore(id, data) { await setDoc(doc(db, 'songs', id), data); }
 async function removeFromFirestore(id) { await deleteDoc(doc(db, 'songs', id)); }
+function albumSlug(name) { return String(name || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'unsorted'; }
+async function writeAlbumToFirestore(name, data) { await setDoc(doc(db, 'albums', albumSlug(name)), data); }
+function getAlbumMeta(name) { return albumsData.find(a => a.name === name) || null; }
 
 function uid() { return 's_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); }
 
@@ -1233,7 +1307,8 @@ function renderSidebar() {
 
   let html = '';
   Object.keys(groups).forEach(album => {
-    html += `<div class="album-group"><div class="album-label">${esc(album)}</div>`;
+    const labelClickable = album !== 'Unsorted';
+    html += `<div class="album-group"><div class="album-label"${labelClickable ? ` style="cursor:pointer;" data-album="${escAttr(album)}" onclick="showAlbumDetail(this.dataset.album)"` : ''}>${esc(album)}</div>`;
     groups[album].forEach(s => {
       const idx = catalog.indexOf(s) + 1;
       const num = String(idx).padStart(2, '0');
@@ -1280,6 +1355,7 @@ function selectSong(id) {
 
 // ── DETAIL VIEW ────────────────────────────────────────────────────
 function showHome() {
+  currentAlbumName = null;
   const total = catalog.length;
   const byStatus = { draft: 0, production: 0, final: 0 };
   catalog.forEach(s => { const st = s.status || 'draft'; byStatus[st] = (byStatus[st] || 0) + 1; });
@@ -1332,19 +1408,288 @@ function showHome() {
 function goHome() {
   if (isEditing) { if (!confirm('Discard unsaved changes?')) return; isEditing = false; editBuffer = null; }
   currentId = null;
+  currentAlbumName = null;
   showHome();
   renderSidebar();
 }
 
+// ── ALBUM DETAIL ───────────────────────────────────────────────────
+const PIPELINE_STAGES = [
+  { key:'idea', label:'Idea' },
+  { key:'draft-lyrics', label:'Draft lyrics' },
+  { key:'demo', label:'Demo' },
+  { key:'recording', label:'Recording' },
+  { key:'mix', label:'Mix' },
+  { key:'master', label:'Master' },
+  { key:'distributed', label:'Distributed' }
+];
+function pipelineLabel(key) { return (PIPELINE_STAGES.find(p => p.key === key) || PIPELINE_STAGES[0]).label; }
+
+function parseDurationToSec(str) {
+  if (!str) return null;
+  const parts = String(str).trim().split(':').map(Number);
+  if (!parts.length || parts.some(isNaN)) return null;
+  return parts.reduce((acc, p) => acc * 60 + p, 0);
+}
+function formatSecToDuration(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.round(sec % 60);
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function showAlbumDetail(name) {
+  if (isEditing) { if (!confirm('Discard unsaved changes?')) return; isEditing = false; editBuffer = null; }
+  isEditingAlbum = false; albumEditBuffer = null;
+  currentAlbumName = name;
+  currentId = null;
+  renderAlbumPage(name);
+  renderSidebar();
+  closeMenu();
+}
+
+function renderAlbumPage(name) {
+  const meta = getAlbumMeta(name) || {};
+  const tracks = catalog.filter(s => (s.album || 'Unsorted') === name)
+    .sort((a, b) => (a.trackNumber ?? 9999) - (b.trackNumber ?? 9999) || (a.createdAt || 0) - (b.createdAt || 0));
+
+  const durations = tracks.map(t => parseDurationToSec(t.duration)).filter(v => v != null);
+  const totalDuration = (tracks.length && durations.length === tracks.length)
+    ? formatSecToDuration(durations.reduce((a, b) => a + b, 0)) : '—';
+
+  const sokojFiled = tracks.filter(t => t.sokojStatus === 'filed').length;
+  const statusLabel = { planned:'Planned', 'in-progress':'In progress', complete:'Complete' }[meta.albumStatus] || 'Planned';
+
+  const paletteHtml = (meta.colorPalette && meta.colorPalette.length)
+    ? `<div class="palette-row">${meta.colorPalette.map(c => `<div class="palette-swatch" style="background:${escAttr(c)}"></div>`).join('')}</div>`
+    : '';
+
+  const tracklistHtml = tracks.length ? tracks.map((t, i) => `
+    <div class="track-row" onclick="selectSong('${t.id}')">
+      <div class="track-reorder" onclick="event.stopPropagation()">
+        <button ${i === 0 ? 'style="visibility:hidden;"' : `onclick="moveTrackUp('${t.id}')"`}>▲</button>
+        <button ${i === tracks.length - 1 ? 'style="visibility:hidden;"' : `onclick="moveTrackDown('${t.id}')"`}>▼</button>
+      </div>
+      <span class="song-num">${String(i + 1).padStart(2, '0')}</span>
+      <div class="track-meta">
+        <div class="track-title">${esc(t.title || 'Untitled')}</div>
+        <div class="track-sub">${t.duration ? esc(t.duration) + ' · ' : ''}${esc(pipelineLabel(t.pipelineStatus))}</div>
+      </div>
+      <span class="badge pipeline-${t.pipelineStatus || 'idea'}">${esc(pipelineLabel(t.pipelineStatus))}</span>
+    </div>`).join('') : `<div style="color:var(--text-faint);font-size:13.5px;padding:20px 0;">No songs in this album yet.</div>`;
+
+  document.getElementById('detail').innerHTML = `
+  <div class="detail-inner">
+    <button class="back-btn" onclick="goHome()">&#8249; Home</button>
+    <div class="detail-head">
+      <h1 class="detail-title">${esc(name)}</h1>
+      <div class="detail-actions">
+        <button class="icon-btn" onclick="editAlbum('${jsAttr(name)}')">Edit album</button>
+      </div>
+    </div>
+    <div class="album-header">
+      ${meta.cover ? `<img class="cover-img" src="${meta.cover}" alt="cover">` : ''}
+      <div class="album-header-info">
+        ${meta.concept ? `<div class="text-block" style="font-style:italic;">${esc(meta.concept)}</div>` : ''}
+        <div class="album-meta-row">
+          <div class="album-meta-item"><b>${tracks.length}</b> songs</div>
+          <div class="album-meta-item"><b>${totalDuration}</b> total</div>
+          <div class="album-meta-item"><span class="badge">${statusLabel}</span></div>
+          ${meta.releaseDate ? `<div class="album-meta-item">${meta.releaseDateIsPlanned ? 'Planned release' : 'Released'}: <b>${esc(meta.releaseDate)}</b></div>` : ''}
+        </div>
+        ${meta.moodTags && meta.moodTags.length ? `<div class="badges">${meta.moodTags.map(t => `<span class="badge">${esc(t)}</span>`).join('')}</div>` : ''}
+        ${paletteHtml}
+        ${meta.referenceSheetUrl ? `<div style="margin-top:12px;"><a href="${escAttr(meta.referenceSheetUrl)}" target="_blank" rel="noopener" class="mini-btn" style="text-decoration:none;display:inline-block;">Visual reference sheet ↗</a></div>` : ''}
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-label">Business</div>
+      <div class="album-meta-row">
+        <div class="album-meta-item">Vocalist master: <b>${meta.vocalistMasterPct != null ? meta.vocalistMasterPct : 15}%</b> (no publishing claim)</div>
+        <div class="album-meta-item"><span class="badge cdbaby-${meta.cdBabyStatus || 'not-sent'}">CD Baby: ${esc((meta.cdBabyStatus || 'not-sent').replace('-', ' '))}</span></div>
+        <div class="album-meta-item">SOKOJ: <b>${sokojFiled}/${tracks.length}</b> filed</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="lyric-head">
+        <div class="section-label">Tracklist</div>
+        <button class="mini-btn" onclick="newSongInAlbum('${jsAttr(name)}')">+ Add song</button>
+      </div>
+      ${tracklistHtml}
+    </div>
+  </div>`;
+}
+
+function newSongInAlbum(name) {
+  newSong();
+  editBuffer.album = name;
+  showEditForm(editBuffer);
+}
+
+function moveTrack(id, dir) {
+  const tracks = catalog.filter(s => (s.album || 'Unsorted') === currentAlbumName)
+    .sort((a, b) => (a.trackNumber ?? 9999) - (b.trackNumber ?? 9999) || (a.createdAt || 0) - (b.createdAt || 0));
+  const idx = tracks.findIndex(s => s.id === id);
+  const swapIdx = idx + dir;
+  if (idx < 0 || swapIdx < 0 || swapIdx >= tracks.length) return;
+  tracks.forEach((s, i) => { s.trackNumber = i + 1; });
+  const tmp = tracks[idx].trackNumber;
+  tracks[idx].trackNumber = tracks[swapIdx].trackNumber;
+  tracks[swapIdx].trackNumber = tmp;
+  renderAlbumPage(currentAlbumName);
+  Promise.all([tracks[idx], tracks[swapIdx]].map(s => { const { id, ...data } = s; return writeToFirestore(id, data); }))
+    .catch(() => showToast('Reorder failed — check connection', 'error'));
+}
+function moveTrackUp(id) { moveTrack(id, -1); }
+function moveTrackDown(id) { moveTrack(id, 1); }
+
+function editAlbum(name) {
+  const meta = getAlbumMeta(name) || {};
+  albumEditBuffer = {
+    name,
+    createdAt: meta.createdAt || Date.now(),
+    cover: meta.cover || '',
+    concept: meta.concept || '',
+    moodTags: (meta.moodTags || []).join(', '),
+    albumStatus: meta.albumStatus || 'planned',
+    releaseDate: meta.releaseDate || '',
+    releaseDateIsPlanned: meta.releaseDateIsPlanned !== false,
+    colorPalette: (meta.colorPalette || []).join(', '),
+    referenceSheetUrl: meta.referenceSheetUrl || '',
+    vocalistMasterPct: meta.vocalistMasterPct != null ? meta.vocalistMasterPct : 15,
+    cdBabyStatus: meta.cdBabyStatus || 'not-sent'
+  };
+  isEditingAlbum = true;
+  showAlbumEditForm();
+}
+
+function showAlbumEditForm() {
+  const a = albumEditBuffer;
+  document.getElementById('detail').innerHTML = `
+  <div class="detail-inner">
+    <div class="form-grid">
+      <div class="field"><label>Album</label><input type="text" value="${escAttr(a.name)}" disabled></div>
+      <div class="field">
+        <label>Cover</label>
+        <div class="cover-upload-row">
+          <div id="albumCoverPreviewWrap">${a.cover ? `<img id="albumCoverPreview" class="cover-preview" src="${a.cover}">` : `<div id="albumCoverPreview" class="cover-preview-empty">No image</div>`}</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <input type="file" id="fa_cover_file" accept="image/*" onchange="handleAlbumCoverUpload(event)" style="font-size:12px;color:var(--text-dim);">
+            ${a.cover ? `<button class="btn" style="flex:0;" onclick="removeAlbumCover()">Remove image</button>` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="field"><label>Concept / lore</label><textarea id="fa_concept" rows="3" placeholder="2-3 sentences describing the album world...">${esc(a.concept)}</textarea></div>
+      <div class="field"><label>Mood tags</label><input id="fa_moodtags" type="text" value="${escAttr(a.moodTags)}" placeholder="e.g. dark, cinematic, obsessive"></div>
+      <div class="field"><label>Album status</label>
+        <div class="seg" id="fa_status" data-value="${escAttr(a.albumStatus)}">
+          <button class="${a.albumStatus === 'planned' ? 'on' : ''}" onclick="seg(this,'planned')">Planned</button>
+          <button class="${a.albumStatus === 'in-progress' ? 'on' : ''}" onclick="seg(this,'in-progress')">In progress</button>
+          <button class="${a.albumStatus === 'complete' ? 'on' : ''}" onclick="seg(this,'complete')">Complete</button>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Release date</label><input id="fa_releasedate" type="date" value="${escAttr(a.releaseDate)}"></div>
+        <div class="field"><label>Date type</label>
+          <div class="seg" id="fa_dateflag" data-value="${a.releaseDateIsPlanned ? 'planned' : 'actual'}">
+            <button class="${a.releaseDateIsPlanned ? 'on' : ''}" onclick="seg(this,'planned')">Planned</button>
+            <button class="${!a.releaseDateIsPlanned ? 'on' : ''}" onclick="seg(this,'actual')">Actual</button>
+          </div>
+        </div>
+      </div>
+      <div class="field"><label>Color palette</label><input id="fa_palette" type="text" value="${escAttr(a.colorPalette)}" placeholder="#7a1f2b, #2b1012, #c98a4b"></div>
+      <div class="field"><label>Reference sheet URL</label><input id="fa_refsheet" type="text" value="${escAttr(a.referenceSheetUrl)}" placeholder="Link to Elise visual reference sheet"></div>
+      <div class="row2">
+        <div class="field"><label>Vocalist master % (default)</label><input id="fa_masterpct" type="number" step="0.1" value="${escAttr(a.vocalistMasterPct)}"></div>
+        <div class="field"><label>CD Baby status</label>
+          <div class="seg" id="fa_cdbaby" data-value="${escAttr(a.cdBabyStatus)}">
+            <button class="${a.cdBabyStatus === 'not-sent' ? 'on' : ''}" onclick="seg(this,'not-sent')">Not sent</button>
+            <button class="${a.cdBabyStatus === 'sent' ? 'on' : ''}" onclick="seg(this,'sent')">Sent</button>
+            <button class="${a.cdBabyStatus === 'live' ? 'on' : ''}" onclick="seg(this,'live')">Live</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-foot">
+        <button class="btn btn-primary" onclick="saveAlbum()">Save</button>
+        <button class="btn" onclick="cancelAlbumEdit()">Cancel</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+let pendingAlbumCover = null;
+function handleAlbumCoverUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    pendingAlbumCover = ev.target.result;
+    document.getElementById('albumCoverPreviewWrap').innerHTML = `<img id="albumCoverPreview" class="cover-preview" src="${pendingAlbumCover}">`;
+  };
+  reader.readAsDataURL(file);
+}
+function removeAlbumCover() {
+  pendingAlbumCover = '';
+  document.getElementById('albumCoverPreviewWrap').innerHTML = `<div id="albumCoverPreview" class="cover-preview-empty">No image</div>`;
+}
+
+async function saveAlbum() {
+  if (!albumEditBuffer) return;
+  const a = albumEditBuffer;
+  a.concept = val('fa_concept');
+  a.moodTags = val('fa_moodtags').split(',').map(s => s.trim()).filter(Boolean);
+  a.albumStatus = document.getElementById('fa_status').dataset.value || 'planned';
+  a.releaseDate = val('fa_releasedate');
+  a.releaseDateIsPlanned = (document.getElementById('fa_dateflag').dataset.value || 'planned') === 'planned';
+  a.colorPalette = val('fa_palette').split(',').map(s => s.trim()).filter(Boolean);
+  a.referenceSheetUrl = val('fa_refsheet');
+  a.vocalistMasterPct = parseFloat(val('fa_masterpct')) || 0;
+  a.cdBabyStatus = document.getElementById('fa_cdbaby').dataset.value || 'not-sent';
+  if (pendingAlbumCover !== null) { a.cover = pendingAlbumCover ? await compressImage(pendingAlbumCover) : ''; pendingAlbumCover = null; }
+  try {
+    showToast('Saving…', 'success');
+    const { name, ...data } = a;
+    await writeAlbumToFirestore(name, data);
+    isEditingAlbum = false;
+    albumEditBuffer = null;
+    showToast('Saved ✓', 'success');
+    showAlbumDetail(name);
+  } catch(e) { showToast('Save failed — check connection', 'error'); }
+}
+
+function cancelAlbumEdit() {
+  isEditingAlbum = false;
+  albumEditBuffer = null;
+  pendingAlbumCover = null;
+  if (currentAlbumName) showAlbumDetail(currentAlbumName); else showHome();
+}
+
+function renderCredits(s) {
+  if (!s.credits || !s.credits.length) return '';
+  return `<div class="section"><div class="section-label">Credits</div><div class="credits-list">${
+    s.credits.map(c => `<span class="credit-chip">${esc(c.name)}${c.role ? `<span class="role">${esc(c.role)}</span>` : ''}</span>`).join('')
+  }</div></div>`;
+}
+
+function renderLyricsHistory(s) {
+  if (!s.lyricsHistory || !s.lyricsHistory.length) return '';
+  const items = [...s.lyricsHistory].reverse().map(h => `<div class="text-block mono" style="font-size:12px;margin-bottom:10px;"><div style="color:var(--text-faint);margin-bottom:4px;">${new Date(h.timestamp).toLocaleString()}</div>${esc(h.text).slice(0, 300)}${h.text.length > 300 ? '\u2026' : ''}</div>`).join('');
+  return `<div class="section"><div class="section-label">Lyrics history (${s.lyricsHistory.length})</div>${items}</div>`;
+}
+
 function showDetail() {
+  currentAlbumName = null;
   const s = catalog.find(x => x.id === currentId);
   if (!s) { showHome(); return; }
   const d = document.getElementById('detail');
   const statusLabel = { draft:'Draft', production:'In production', final:'Final' }[s.status] || 'Draft';
+  const masterPct = (s.vocalistMasterPct !== '' && s.vocalistMasterPct != null) ? s.vocalistMasterPct : null;
+  const albumMasterPct = s.album ? getAlbumMeta(s.album)?.vocalistMasterPct : null;
 
   d.innerHTML = `
   <div class="detail-inner">
-    <button class="back-btn" onclick="goHome()">&#8249; Home</button>
+    ${s.album
+      ? `<button class="back-btn" onclick="showAlbumDetail('${jsAttr(s.album)}')">&#8249; ${esc(s.album)}</button>`
+      : `<button class="back-btn" onclick="goHome()">&#8249; Home</button>`}
     <div class="detail-head">
       <h1 class="detail-title">${esc(s.title || 'Untitled')}</h1>
       <div class="detail-actions">
@@ -1355,13 +1700,20 @@ function showDetail() {
     <div class="badges">
       ${s.vocal ? `<span class="badge vocal">${esc(s.vocal)}</span>` : ''}
       <span class="badge status-${s.status||'draft'}">${statusLabel}</span>
+      <span class="badge pipeline-${s.pipelineStatus || 'idea'}">${esc(pipelineLabel(s.pipelineStatus))}</span>
       ${s.album ? `<span class="badge">${esc(s.album)}</span>` : ''}
+      <span class="badge sokoj-${s.sokojStatus === 'filed' ? 'filed' : 'not-filed'}">SOKOJ: ${s.sokojStatus === 'filed' ? 'Filed' : 'Not filed'}</span>
     </div>
     ${s.cover ? `<div class="cover-block"><img class="cover-img" src="${s.cover}" alt="cover"></div>` : ''}
     <div class="specs">
       <div class="spec"><div class="k">BPM</div><div class="v">${esc(s.bpm) || '\u2014'}</div></div>
       <div class="spec"><div class="k">Key</div><div class="v">${esc(s.key) || '\u2014'}</div></div>
+      <div class="spec"><div class="k">Duration</div><div class="v">${esc(s.duration) || '\u2014'}</div></div>
       <div class="spec"><div class="k">Genre</div><div class="v" style="font-family:var(--sans);font-size:13px;">${esc(s.genre) || '\u2014'}</div></div>
+    </div>
+    <div class="section">
+      <div class="section-label">Vocalist master</div>
+      <div class="text-block">${masterPct != null ? masterPct + '%' : (albumMasterPct != null ? albumMasterPct + '% (album default)' : '15% (default)')} \u2014 no publishing claim</div>
     </div>
     ${renderStreamLinks(s)}
     ${s.lyrics ? `<div class="section">
@@ -1384,7 +1736,10 @@ function showDetail() {
     ${s.chords ? `<div class="section"><div class="section-label">Chord track</div><div class="text-block mono">${esc(s.chords)}</div></div>` : ''}
     ${s.instruments ? `<div class="section"><div class="section-label">Instruments / Arrangement</div><div class="text-block">${esc(s.instruments)}</div></div>` : ''}
     ${s.suno ? `<div class="section"><div class="section-label">Suno style prompt</div><div class="text-block mono suno-block"><button class="copy-btn" onclick="copySuno()">Copy</button>${esc(s.suno)}</div></div>` : ''}
+    ${s.sunoNegative ? `<div class="section"><div class="section-label">Suno negative prompt</div><div class="text-block mono">${esc(s.sunoNegative)}</div></div>` : ''}
     ${s.production ? `<div class="section"><div class="section-label">Production notes</div><div class="text-block">${esc(s.production)}</div></div>` : ''}
+    ${renderCredits(s)}
+    ${s.crossCatalogEcho ? `<div class="section"><div class="section-label">Cross-catalog echo</div><div class="text-block">${esc(s.crossCatalogEcho)}</div></div>` : ''}
     <div class="section">
       <div class="analysis-head">
         <div class="section-label">AI Analysis</div>
@@ -1392,6 +1747,7 @@ function showDetail() {
       </div>
       ${s.analysis ? `<div class="text-block">${esc(s.analysis)}</div>` : `<div class="text-block" style="color:var(--text-faint);font-style:italic;">No analysis yet. Generate one, or add it by editing the song.</div>`}
     </div>
+    ${renderLyricsHistory(s)}
   </div>`;
 }
 
@@ -1459,7 +1815,7 @@ function mp3Placeholder() { showToast('MP3 upload coming in the cloud version', 
 // ── EDIT FORM ──────────────────────────────────────────────────────
 function newSong() {
   if (isEditing) { if (!confirm('Discard unsaved changes?')) return; }
-  editBuffer = { id: uid(), title:'', vocal:'Intimate female', status:'draft', album:'', bpm:'', key:'', genre:'', lyrics:'', suno:'', production:'', instruments:'', chords:'', analysis:'', cover:'', spotify:'', apple:'', youtube:'', soundcloud:'', deezer:'', audioName:'', createdAt: Date.now() };
+  editBuffer = { id: uid(), title:'', vocal:'Intimate female', status:'draft', pipelineStatus:'idea', album:'', bpm:'', key:'', duration:'', genre:'', lyrics:'', suno:'', sunoNegative:'', production:'', instruments:'', chords:'', analysis:'', cover:'', spotify:'', apple:'', youtube:'', soundcloud:'', deezer:'', audioName:'', credits:[], sokojStatus:'not-filed', vocalistMasterPct:'', crossCatalogEcho:'', lyricsHistory:[], trackNumber: null, createdAt: Date.now() };
   currentId = editBuffer.id;
   isEditing = true;
   showEditForm(editBuffer);
@@ -1470,9 +1826,20 @@ function newSong() {
 function editSong() {
   const s = catalog.find(x => x.id === currentId);
   if (!s) return;
-  editBuffer = { ...s };
+  editBuffer = { ...s, _prevLyrics: s.lyrics || '' };
   isEditing = true;
   showEditForm(editBuffer);
+}
+
+function creditsToText(credits) {
+  return (credits || []).map(c => c.role ? `${c.name} — ${c.role}` : c.name).join('\n');
+}
+function textToCredits(text) {
+  return text.split('\n').map(l => l.trim()).filter(Boolean).map(l => {
+    const idx = l.indexOf('—');
+    if (idx === -1) return { name: l, role: '' };
+    return { name: l.slice(0, idx).trim(), role: l.slice(idx + 1).trim() };
+  });
 }
 
 function uniqueOptions(values) {
@@ -1499,19 +1866,37 @@ function showEditForm(s) {
           <button class="${s.status==='final'?'on':''}" onclick="seg(this,'final')">Final</button>
         </div>
       </div>
+      <div class="field"><label>Pipeline status</label>
+        <select id="f_pipeline">
+          ${PIPELINE_STAGES.map(p => `<option value="${p.key}" ${(s.pipelineStatus||'idea')===p.key?'selected':''}>${p.label}</option>`).join('')}
+        </select>
+      </div>
       <div class="row2">
         <div class="field"><label>Album / series</label><input id="f_album" type="text" list="albumOptions" value="${escAttr(s.album)}" placeholder="e.g. First Sin"><datalist id="albumOptions">${uniqueOptions(catalog.map(x => x.album))}</datalist></div>
         <div class="field"><label>Genre / direction</label><input id="f_genre" type="text" list="genreOptions" value="${escAttr(s.genre)}" placeholder="e.g. Dark pop"><datalist id="genreOptions">${uniqueOptions(catalog.map(x => x.genre))}</datalist></div>
       </div>
-      <div class="row2">
+      <div class="row3">
         <div class="field"><label>BPM</label><input id="f_bpm" type="text" value="${escAttr(s.bpm)}" placeholder="e.g. 55"></div>
         <div class="field"><label>Song key</label><input id="f_key" type="text" value="${escAttr(s.key)}" placeholder="e.g. A minor"></div>
+        <div class="field"><label>Duration</label><input id="f_duration" type="text" value="${escAttr(s.duration)}" placeholder="e.g. 3:45"></div>
       </div>
       <div class="field"><label>Lyrics</label><textarea id="f_lyrics" class="lyric-area" placeholder="[Verse 1]&#10;...">${esc(s.lyrics)}</textarea></div>
       <div class="field"><label>Chord track</label><textarea id="f_chords" class="mono-area" rows="3" placeholder="Am - F - C - G">${esc(s.chords)}</textarea></div>
       <div class="field"><label>Instruments / arrangement</label><textarea id="f_instruments" rows="3" placeholder="Piano (lead), strings...">${esc(s.instruments)}</textarea></div>
       <div class="field"><label>Suno style prompt</label><textarea id="f_suno" class="mono-area" rows="3" placeholder="Intimate female vocal, dark pop, 55 BPM...">${esc(s.suno)}</textarea></div>
+      <div class="field"><label>Suno negative prompt</label><textarea id="f_suno_neg" class="mono-area" rows="2" placeholder="What to avoid: e.g. no rap, no male backing vocals...">${esc(s.sunoNegative)}</textarea></div>
       <div class="field"><label>Production notes</label><textarea id="f_production" rows="4" placeholder="Arrangement, mixing notes...">${esc(s.production)}</textarea></div>
+      <div class="field"><label>Credits (one per line: Name — Role)</label><textarea id="f_credits" rows="3" placeholder="Elise — Vocals&#10;Milos — Production">${esc(creditsToText(s.credits))}</textarea></div>
+      <div class="row2">
+        <div class="field"><label>SOKOJ status</label>
+          <div class="seg" id="f_sokoj" data-value="${escAttr(s.sokojStatus||'not-filed')}">
+            <button class="${(s.sokojStatus||'not-filed')==='not-filed'?'on':''}" onclick="seg(this,'not-filed')">Not filed</button>
+            <button class="${s.sokojStatus==='filed'?'on':''}" onclick="seg(this,'filed')">Filed</button>
+          </div>
+        </div>
+        <div class="field"><label>Vocalist master % (override, blank = album default)</label><input id="f_masterpct" type="number" step="0.1" value="${escAttr(s.vocalistMasterPct)}"></div>
+      </div>
+      <div class="field"><label>Cross-catalog echo</label><textarea id="f_echo" rows="2" placeholder="This image/phrase also appears in...">${esc(s.crossCatalogEcho)}</textarea></div>
       <div class="field"><label>AI analysis</label><textarea id="f_analysis" rows="6" placeholder="Analysis of lyrics and music...">${esc(s.analysis)}</textarea></div>
       <div class="field">
         <label>Cover photo</label>
@@ -1578,12 +1963,24 @@ async function saveSong() {
   editBuffer.youtube = val('f_youtube');
   editBuffer.soundcloud = val('f_soundcloud');
   editBuffer.deezer = val('f_deezer');
+  editBuffer.pipelineStatus = val('f_pipeline') || 'idea';
+  editBuffer.duration = val('f_duration');
+  editBuffer.sunoNegative = val('f_suno_neg');
+  editBuffer.credits = textToCredits(val('f_credits'));
+  editBuffer.sokojStatus = document.getElementById('f_sokoj').dataset.value || 'not-filed';
+  const masterVal = val('f_masterpct');
+  editBuffer.vocalistMasterPct = masterVal === '' ? '' : parseFloat(masterVal);
+  editBuffer.crossCatalogEcho = val('f_echo');
   if (pendingCover !== null) { editBuffer.cover = pendingCover ? await compressImage(pendingCover) : ''; pendingCover = null; }
   if (!editBuffer.title.trim()) editBuffer.title = 'Untitled';
   const dup = findDuplicate(editBuffer.lyrics, editBuffer.id);
   if (dup) {
     if (!confirm(`These lyrics already exist in the catalog as "${dup.title || 'Untitled'}". Save anyway?`)) return;
   }
+  if (editBuffer._prevLyrics !== undefined && editBuffer._prevLyrics !== editBuffer.lyrics && editBuffer._prevLyrics.trim()) {
+    editBuffer.lyricsHistory = [...(editBuffer.lyricsHistory || []), { text: editBuffer._prevLyrics, timestamp: Date.now() }];
+  }
+  delete editBuffer._prevLyrics;
   editBuffer.updatedAt = Date.now();
   if (!editBuffer.createdAt) editBuffer.createdAt = Date.now();
   try {
@@ -1641,11 +2038,15 @@ async function doImport() {
       const id = s.id || uid();
       const clean = {
         title:s.title||'', vocal:s.vocal||'Intimate female', status:s.status||'draft',
+        pipelineStatus:s.pipelineStatus||'idea', duration:s.duration||'',
         album:s.album||'', bpm:s.bpm||'', key:s.key||'', genre:s.genre||'',
-        lyrics:s.lyrics||'', suno:s.suno||'', production:s.production||'',
+        lyrics:s.lyrics||'', suno:s.suno||'', sunoNegative:s.sunoNegative||'', production:s.production||'',
         instruments:s.instruments||'', chords:s.chords||'', analysis:s.analysis||'', cover:s.cover||'',
         spotify:s.spotify||'', apple:s.apple||'', youtube:s.youtube||'',
         soundcloud:s.soundcloud||'', deezer:s.deezer||'', audioName:s.audioName||'',
+        credits:s.credits||[], sokojStatus:s.sokojStatus||'not-filed',
+        vocalistMasterPct:s.vocalistMasterPct!=null?s.vocalistMasterPct:'', crossCatalogEcho:s.crossCatalogEcho||'',
+        lyricsHistory:s.lyricsHistory||[], trackNumber:s.trackNumber!=null?s.trackNumber:null,
         createdAt:s.createdAt||Date.now(), updatedAt:Date.now()
       };
       await writeToFirestore(id, clean);
@@ -1678,6 +2079,7 @@ function copySuno() {
 function val(id) { const el = document.getElementById(id); return el ? el.value : ''; }
 function esc(str) { return String(str==null?'':str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function escAttr(str) { return esc(str).replace(/"/g,'&quot;'); }
+function jsAttr(str) { return escAttr(String(str==null?'':str).replace(/\\/g,'\\\\').replace(/'/g,"\\'")); }
 
 let toastTimer;
 function showToast(msg, type='success') {
@@ -1768,6 +2170,15 @@ window.toggleMenu = toggleMenu;
 window.closeMenu = closeMenu;
 window.goHome = goHome;
 window.seg = seg;
+window.showAlbumDetail = showAlbumDetail;
+window.editAlbum = editAlbum;
+window.saveAlbum = saveAlbum;
+window.cancelAlbumEdit = cancelAlbumEdit;
+window.moveTrackUp = moveTrackUp;
+window.moveTrackDown = moveTrackDown;
+window.newSongInAlbum = newSongInAlbum;
+window.handleAlbumCoverUpload = handleAlbumCoverUpload;
+window.removeAlbumCover = removeAlbumCover;
 
 // ── INIT ───────────────────────────────────────────────────────────
 applyTheme();
