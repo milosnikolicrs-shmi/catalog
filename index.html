@@ -420,7 +420,7 @@
   .detail-inner {
     max-width: 720px;
     margin: 0 auto;
-    padding: 36px 40px 90px;
+    padding: 64px 40px 90px;
   }
 
   .empty {
@@ -1190,7 +1190,7 @@
     body.menu-open .sidebar-backdrop { display: block; }
 
     .detail { padding-top: var(--topbar-h); }
-    .detail-inner { padding: 20px 18px 70px; }
+    .detail-inner { padding: 34px 18px 70px; }
     .detail-title { font-size: 28px; }
     .detail-head { flex-direction: column; gap: 12px; }
     .detail-actions { padding-top: 0; width: 100%; }
@@ -1524,6 +1524,7 @@ function selectSong(id) {
   showDetail();
   renderSidebar();
   closeMenu();
+  document.querySelector('.detail').scrollTop = 0;
 }
 
 // ── DETAIL VIEW ────────────────────────────────────────────────────
@@ -1630,6 +1631,7 @@ function showAlbumDetail(name) {
   renderAlbumPage(name);
   renderSidebar();
   closeMenu();
+  document.querySelector('.detail').scrollTop = 0;
 }
 
 function renderAlbumPage(name) {
