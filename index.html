@@ -1343,16 +1343,21 @@ function renderAlbumFilters() {
   catalog.forEach(s => { const a = (s.album || '').trim(); if (a) albums.add(a); else hasUnsorted = true; });
   const sorted = Array.from(albums).sort((a, b) => a.localeCompare(b));
   if (hasUnsorted) sorted.push('Unsorted');
-  let html = `<button class="chip ${filterAlbum === '' ? 'on' : ''}" onclick="filterByAlbum('')">All</button>`;
+  let html = `<button class="chip ${!currentAlbumName ? 'on' : ''}" onclick="filterByAlbum('')">All</button>`;
   sorted.forEach(a => {
-    html += `<button class="chip ${filterAlbum === a ? 'on' : ''}" data-album="${escAttr(a)}" onclick="filterByAlbum(this.dataset.album)">${esc(a)}</button>`;
+    html += `<button class="chip ${currentAlbumName === a ? 'on' : ''}" data-album="${escAttr(a)}" onclick="filterByAlbum(this.dataset.album)">${esc(a)}</button>`;
   });
   el.innerHTML = html;
 }
 
 function filterByAlbum(album) {
-  filterAlbum = album;
-  renderSidebar();
+  if (!album || album === 'Unsorted') {
+    filterAlbum = album === 'Unsorted' ? album : '';
+    if (currentAlbumName) { currentAlbumName = null; showHome(); }
+    renderSidebar();
+    return;
+  }
+  showAlbumDetail(album);
 }
 
 function selectSong(id) {
