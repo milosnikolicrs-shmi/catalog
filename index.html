@@ -1674,12 +1674,11 @@ async function saveAlbum() {
   if (pendingAlbumCover !== null) { a.cover = pendingAlbumCover ? await compressImage(pendingAlbumCover) : ''; pendingAlbumCover = null; }
   try {
     showToast('Saving…', 'success');
-    const { name, ...data } = a;
-    await writeAlbumToFirestore(name, data);
+    await writeAlbumToFirestore(a.name, a);
     isEditingAlbum = false;
     albumEditBuffer = null;
     showToast('Saved ✓', 'success');
-    showAlbumDetail(name);
+    showAlbumDetail(a.name);
   } catch(e) { showToast('Save failed: ' + (e.code || e.message || 'check connection'), 'error'); }
 }
 
