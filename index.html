@@ -1423,6 +1423,12 @@ function editSong() {
   showEditForm(editBuffer);
 }
 
+function uniqueOptions(values) {
+  const seen = new Set();
+  values.forEach(v => { if (v && v.trim()) seen.add(v.trim()); });
+  return Array.from(seen).sort((a, b) => a.localeCompare(b)).map(v => `<option value="${escAttr(v)}">`).join('');
+}
+
 function showEditForm(s) {
   document.getElementById('detail').innerHTML = `
   <div class="detail-inner">
@@ -1442,8 +1448,8 @@ function showEditForm(s) {
         </div>
       </div>
       <div class="row2">
-        <div class="field"><label>Album / series</label><input id="f_album" type="text" value="${escAttr(s.album)}" placeholder="e.g. First Sin"></div>
-        <div class="field"><label>Genre / direction</label><input id="f_genre" type="text" value="${escAttr(s.genre)}" placeholder="e.g. Dark pop"></div>
+        <div class="field"><label>Album / series</label><input id="f_album" type="text" list="albumOptions" value="${escAttr(s.album)}" placeholder="e.g. First Sin"><datalist id="albumOptions">${uniqueOptions(catalog.map(x => x.album))}</datalist></div>
+        <div class="field"><label>Genre / direction</label><input id="f_genre" type="text" list="genreOptions" value="${escAttr(s.genre)}" placeholder="e.g. Dark pop"><datalist id="genreOptions">${uniqueOptions(catalog.map(x => x.genre))}</datalist></div>
       </div>
       <div class="row2">
         <div class="field"><label>BPM</label><input id="f_bpm" type="text" value="${escAttr(s.bpm)}" placeholder="e.g. 55"></div>
