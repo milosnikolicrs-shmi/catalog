@@ -1241,7 +1241,7 @@ function initFirestore() {
     albumsData = [];
     snapshot.forEach(d => albumsData.push({ id: d.id, ...d.data() }));
     if (!isEditing && !isEditingAlbum && currentAlbumName) showAlbumDetail(currentAlbumName);
-  });
+  }, (err) => { showToast('Albums sync error: ' + (err.code || err.message), 'error'); });
 }
 
 async function writeToFirestore(id, data) { await setDoc(doc(db, 'songs', id), data); }
@@ -1680,7 +1680,7 @@ async function saveAlbum() {
     albumEditBuffer = null;
     showToast('Saved ✓', 'success');
     showAlbumDetail(name);
-  } catch(e) { showToast('Save failed — check connection', 'error'); }
+  } catch(e) { showToast('Save failed: ' + (e.code || e.message || 'check connection'), 'error'); }
 }
 
 function cancelAlbumEdit() {
