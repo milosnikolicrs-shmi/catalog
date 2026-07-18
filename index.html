@@ -1674,6 +1674,7 @@ function filterByAlbum(album) {
 function selectSong(id) {
   if (isEditing) { if (!confirm('Discard unsaved changes?')) return; isEditing = false; editBuffer = null; }
   currentId = id;
+  pushView({ view: 'song', id });
   showDetail();
   renderSidebar();
   closeMenu();
@@ -1748,6 +1749,7 @@ function goHome() {
   if (isEditing) { if (!confirm('Discard unsaved changes?')) return; isEditing = false; editBuffer = null; }
   currentId = null;
   currentAlbumName = null;
+  pushView({ view: 'home' });
   showHome();
   renderSidebar();
 }
@@ -1781,6 +1783,7 @@ function showAlbumDetail(name) {
   isEditingAlbum = false; albumEditBuffer = null;
   currentAlbumName = name;
   currentId = null;
+  pushView({ view: 'album', name });
   renderAlbumPage(name);
   renderSidebar();
   closeMenu();
@@ -2043,6 +2046,7 @@ function openPerfViewFor(id) {
 function openPerfView() {
   const s = catalog.find(x => x.id === currentId);
   if (!s) return;
+  pushView({ view: 'perf', id: currentId });
   const sheet = (s.perfSheet && s.perfSheet.trim()) ? s.perfSheet : (s.lyrics || '');
   const sections = parsePerfSheet(sheet);
   document.documentElement.style.setProperty('--perf-scale', perfScale);
@@ -2076,7 +2080,7 @@ function openPerfView() {
         <button class="perf-btn" onclick="perfFont(1)">A+</button>
         <button class="perf-btn" onclick="toggleTheme()">☾ / ☀</button>
         <button class="perf-btn" onclick="editPerfSheet()">Edit</button>
-        <button class="perf-btn" onclick="closePerfView()">✕ Close</button>
+        <button class="perf-btn" onclick="goBack()">✕ Close</button>
       </div>
     </div>
     ${body}
@@ -2693,6 +2697,7 @@ window.removeCover = removeCover;
 window.toggleMenu = toggleMenu;
 window.closeMenu = closeMenu;
 window.goHome = goHome;
+window.goBack = goBack;
 window.seg = seg;
 window.showAlbumDetail = showAlbumDetail;
 window.editAlbum = editAlbum;
@@ -2720,15 +2725,56 @@ function canGoBack() {
   return !!(currentId || currentAlbumName);
 }
 
-function goBack() {
-  if (perfIsOpen()) { closePerfView(); return; }
-  if (currentId) {
-    const s = catalog.find(x => x.id === currentId);
-    if (s && s.album) showAlbumDetail(s.album); else goHome();
-    return;
-  }
-  if (currentAlbumName) goHome();
+// Back is routed through browser history, so the macOS two-finger
+// trackpad swipe, the back button and Cmd+[ all drive the same path.
+function goBack() { history.back(); }
+
+// ── HISTORY ROUTING ────────────────────────────────────────────────
+let suppressHistory = false;
+
+function currentViewState() {
+  if (perfIsOpen()) return { view: 'perf', id: currentId };
+  if (currentId) return { view: 'song', id: currentId };
+  if (currentAlbumName) return { view: 'album', name: currentAlbumName };
+  return { view: 'home' };
 }
+
+function pushView(state) {
+  if (suppressHistory) return;
+  const cur = history.state;
+  if (cur && cur.view === state.view && cur.id === state.id && cur.name === state.name) return;
+  history.pushState(state, '');
+}
+
+function applyView(state) {
+  suppressHistory = true;
+  try {
+    const v = state && state.view;
+    if (v === 'perf' && state.id && catalog.some(x => x.id === state.id)) {
+      currentId = state.id; currentAlbumName = null;
+      showDetail(); renderSidebar(); openPerfView();
+    } else if (v === 'song' && state.id && catalog.some(x => x.id === state.id)) {
+      closePerfView();
+      currentId = state.id; currentAlbumName = null;
+      showDetail(); renderSidebar();
+    } else if (v === 'album' && state.name) {
+      closePerfView();
+      showAlbumDetail(state.name);
+    } else {
+      closePerfView();
+      goHome();
+    }
+  } finally { suppressHistory = false; }
+}
+
+window.addEventListener('popstate', e => {
+  if (isEditing || isEditingAlbum) {
+    if (!confirm('Discard unsaved changes?')) { history.pushState(currentViewState(), ''); return; }
+    isEditing = false; editBuffer = null;
+    isEditingAlbum = false; albumEditBuffer = null;
+  }
+  applyView(e.state || { view: 'home' });
+});
 
 const SWIPE_EDGE = 28, SWIPE_THRESHOLD = 72;
 let swStartX = 0, swStartY = 0, swDx = 0, swActive = false, swTarget = null, swDecided = false;
@@ -2789,6 +2835,7 @@ document.addEventListener('touchend', () => {
 document.addEventListener('touchcancel', () => { if (swActive) swipeReset(true); }, { passive: true });
 
 // ── INIT ───────────────────────────────────────────────────────────
+history.replaceState({ view: 'home' }, '');
 applyTheme();
 applyRail();
 showHome();
