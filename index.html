@@ -1132,8 +1132,7 @@ function initFirestore() {
         if (still) showDetail();
         else { currentId = catalog.length ? catalog[0].id : null; if (currentId) showDetail(); else showHome(); }
       } else {
-        if (catalog.length) { currentId = catalog[0].id; showDetail(); }
-        else showHome();
+        showHome();
       }
     }
   }, () => { showToast('Connection error — check network', 'error'); });
