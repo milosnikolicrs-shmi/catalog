@@ -36,6 +36,27 @@
     --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
     --sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
     --topbar-h: 0px;
+
+    /* ── SPACING (8pt grid) ── */
+    --s1: 4px;
+    --s2: 8px;
+    --s3: 12px;
+    --s4: 16px;
+    --s5: 24px;
+    --s6: 32px;
+    --s7: 48px;
+    --s8: 64px;
+
+    /* ── MOTION ── */
+    --dur: 150ms;
+    --ease: cubic-bezier(0.32, 0.72, 0, 1);
+
+    /* ── DYNAMIC GOLD ── */
+    --gold-hover: #d7b679;
+
+    /* ── GLASS ── */
+    --glass-bg: rgba(31, 28, 23, 0.72);
+    --glass-highlight: rgba(255, 255, 255, 0.06);
   }
 
   body.light {
@@ -59,9 +80,22 @@
     --final: #3d7a5a;
     --shadow-1: 0 1px 3px rgba(60, 48, 25, 0.1);
     --shadow-2: 0 8px 30px -10px rgba(60, 48, 25, 0.22);
+    --gold-hover: #a8894a;
+    --glass-bg: rgba(253, 252, 249, 0.72);
+    --glass-highlight: rgba(255, 255, 255, 0.5);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  /* ── SCROLLBAR (near-invisible, Apple-style) ── */
+  ::-webkit-scrollbar { width: 3px; height: 3px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--text) 20%, transparent);
+    border-radius: 100px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--text) 32%, transparent); }
+  * { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--text) 20%, transparent) transparent; }
   html { height: 100%; }
   body {
     height: 100%;
@@ -84,7 +118,31 @@
   .btn:active, .icon-btn:active, .mini-btn:active, .home-new:active,
   .ai-btn:active, .gate-btn:active, .copy-btn:active, .seg button:active,
   .song-item:active, .recent-item:active, .stream-link:active, .back-btn:active,
+  .perf-btn:active, .chip:active, .track-row:active,
   .topbar-menu:active { transform: scale(0.965); }
+
+  /* ── CONTENT CROSSFADE ── */
+  @keyframes contentIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
+  }
+  .detail-inner, .perf-inner { animation: contentIn var(--dur) var(--ease); }
+  @media (prefers-reduced-motion: reduce) {
+    .detail-inner, .perf-inner { animation: none; }
+    * { transition-duration: 1ms !important; }
+  }
+
+  /* ── SUBTLE HOVER (brightness + shadow + scale, no colour shift) ── */
+  .btn, .icon-btn, .mini-btn, .stream-link, .perf-btn, .chip,
+  .track-row, .audio-placeholder button, .track-reorder button {
+    transition: filter var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  .btn:hover, .icon-btn:hover, .mini-btn:hover, .stream-link:hover, .perf-btn:hover,
+  .chip:hover, .track-row:hover, .audio-placeholder button:hover, .track-reorder button:hover {
+    filter: brightness(1.08);
+    box-shadow: var(--shadow-1);
+    transform: scale(1.01);
+  }
 
   /* ── TOPBAR (mobile) ─────────────────────────── */
   .topbar {
@@ -96,7 +154,7 @@
     background: color-mix(in srgb, var(--bg) 78%, transparent);
     backdrop-filter: blur(20px) saturate(1.6);
     -webkit-backdrop-filter: blur(20px) saturate(1.6);
-    border-bottom: 0.5px solid var(--hairline);
+    box-shadow: 0 1px 12px -4px rgba(0,0,0,0.35);
     z-index: 50;
     align-items: center;
     padding-left: 6px;
@@ -140,13 +198,57 @@
     background: color-mix(in srgb, var(--bg-panel) 94%, transparent);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border-right: 0.5px solid var(--hairline);
+    box-shadow: 1px 0 16px -6px rgba(0,0,0,0.4);
     display: flex;
     flex-direction: column;
     min-height: 0;
   }
 
-  .brand { padding: 22px 18px 16px; }
+  .brand { padding: var(--s5) var(--s4) var(--s4); position: relative; }
+
+  /* ── SIDEBAR COLLAPSE ── */
+  .collapse-btn {
+    position: absolute;
+    top: var(--s5);
+    right: var(--s3);
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    border-radius: 7px;
+    color: var(--text-faint);
+    font-size: 13px;
+    cursor: pointer;
+    transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
+  }
+  .collapse-btn:hover { color: var(--gold-hover); background: var(--bg-elev); }
+  body.rail .app { grid-template-columns: 68px 1fr; }
+  body.rail .sidebar { padding-top: 0; }
+  body.rail .brand h1,
+  body.rail .brand .sub,
+  body.rail .search-wrap,
+  body.rail .filters,
+  body.rail .chip-row,
+  body.rail .album-label,
+  body.rail .song-meta,
+  body.rail .status-cap,
+  body.rail .sidebar-foot .btn span,
+  body.rail .theme-foot { display: none; }
+  body.rail .brand { padding: var(--s5) 0 var(--s4); text-align: center; }
+  body.rail .collapse-btn { position: static; margin: var(--s2) auto 0; }
+  body.rail .brand > div { justify-content: center; }
+  body.rail .song-item { justify-content: center; padding: var(--s3) 0; gap: 0; }
+  body.rail .song-num { display: none; }
+  body.rail .song-item::before { left: 2px; }
+  body.rail .sidebar-foot { padding: var(--s2); flex-direction: column; }
+  body.rail .sidebar-foot .btn { padding: var(--s2) 0; font-size: 11px; }
+  @media (max-width: 760px) {
+    .collapse-btn { display: none; }
+    body.rail .app { grid-template-columns: 1fr; }
+  }
   .brand h1 {
     font-family: var(--serif);
     font-size: 23px;
@@ -162,7 +264,7 @@
     margin-top: 3px;
   }
 
-  .search-wrap { padding: 0 14px 10px; position: relative; }
+  .search-wrap { padding: 0 var(--s4) var(--s3); position: relative; }
   .search-wrap::before {
     content: '';
     position: absolute;
@@ -175,16 +277,22 @@
   }
   .search-wrap input {
     width: 100%;
-    background: var(--bg-elev);
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
     border: none;
     border-radius: 10px;
-    padding: 9px 12px 9px 32px;
+    padding: 10px var(--s3) 10px var(--s6);
     color: var(--text);
     font-size: 16px;
     outline: none;
-    transition: box-shadow 0.15s, background 0.15s;
+    box-shadow: inset 0 0.5px 0 var(--glass-highlight), var(--shadow-1);
+    transition: box-shadow var(--dur) var(--ease), background var(--dur) var(--ease);
   }
-  .search-wrap input:focus { box-shadow: 0 0 0 3px var(--gold-glow); background: var(--bg-fill); }
+  .search-wrap input:focus {
+    box-shadow: inset 0 0.5px 0 var(--glass-highlight), 0 0 0 3px var(--gold-glow);
+    background: var(--bg-fill);
+  }
   .search-wrap input::placeholder { color: var(--text-faint); font-size: 13.5px; }
 
   /* ── SEGMENTED CONTROLS ───────────────────────── */
@@ -286,7 +394,6 @@
     cursor: pointer;
     transition: background 0.15s;
   }
-  .track-row:hover { background: var(--bg-elev); }
   .track-row .song-num { color: var(--text-faint); font-family: var(--mono); font-size: 12px; width: 22px; }
   .track-row .track-meta { flex: 1; min-width: 0; }
   .track-row .track-title { font-size: 15px; color: var(--text); }
@@ -303,7 +410,6 @@
     cursor: pointer;
     line-height: 1;
   }
-  .track-reorder button:hover { background: var(--bg-fill); color: var(--text); }
 
   .song-list {
     flex: 1;
@@ -332,23 +438,44 @@
   button.album-label:active { color: var(--gold); }
 
   .song-item {
-    padding: 10px 12px;
+    position: relative;
+    padding: var(--s3) var(--s3);
     border-radius: 10px;
     cursor: pointer;
-    transition: background 0.13s, transform 0.12s;
+    transition: filter var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
     display: flex;
     align-items: center;
-    gap: 11px;
-    min-height: 46px;
+    gap: var(--s3);
+    min-height: 48px;
   }
-  .song-item:hover { background: var(--bg-elev); }
-  .song-item.active { background: var(--gold-tint); }
+  .song-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%) scaleY(0);
+    width: 2px;
+    height: 26px;
+    border-radius: 100px;
+    background: var(--gold);
+    transition: transform var(--dur) var(--ease);
+  }
+  .song-item:hover { filter: brightness(1.06); box-shadow: var(--shadow-1); transform: scale(1.01); }
+  .song-item.active::before { transform: translateY(-50%) scaleY(1); }
   .song-item.active .song-title-s { color: var(--gold); }
   .song-num {
     font-family: var(--mono);
     font-size: 10.5px;
     color: var(--text-faint);
     min-width: 20px;
+  }
+  .song-thumb {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    object-fit: cover;
+    box-shadow: var(--shadow-1);
   }
   .song-meta { flex: 1; min-width: 0; }
   .song-title-s {
@@ -358,29 +485,37 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: color 0.13s;
+    transition: color var(--dur) var(--ease);
   }
   .song-sub-s {
     font-size: 11px;
     color: var(--text-faint);
-    margin-top: 2.5px;
+    margin-top: var(--s1);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .status-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
+
+  /* ── STATUS CAPSULES ── */
+  .status-cap {
     flex-shrink: 0;
-    box-shadow: 0 0 6px currentColor;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--s2);
+    border-radius: 100px;
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
   }
-  .status-dot.draft { background: var(--draft); color: transparent; }
-  .status-dot.production { background: var(--prod); color: var(--prod); }
-  .status-dot.final { background: var(--final); color: var(--final); }
+  .status-cap.draft { background: color-mix(in srgb, var(--draft) 16%, transparent); color: var(--text-dim); }
+  .status-cap.production { background: var(--gold-tint); color: var(--prod); }
+  .status-cap.final { background: color-mix(in srgb, var(--final) 18%, transparent); color: var(--final); }
 
   .sidebar-foot {
-    border-top: 0.5px solid var(--hairline);
-    padding: 12px 14px;
+    padding: var(--s3) var(--s4);
     display: flex;
     gap: 8px;
   }
@@ -400,7 +535,6 @@
     flex: 1;
     min-height: 40px;
   }
-  .btn:hover { background: var(--bg-fill); }
   .btn-primary {
     background: linear-gradient(155deg, var(--gold), var(--gold-soft));
     color: #1a150b;
@@ -449,7 +583,9 @@
     transition: opacity 0.13s, transform 0.12s;
     font-weight: 500;
   }
-  .back-btn:hover { opacity: 0.75; }
+  .back-btn { transition: color var(--dur) var(--ease); }
+  .back-btn:hover { color: var(--gold-hover); }
+  button.album-label:hover { color: var(--gold-hover); }
 
   .detail-head {
     display: flex;
@@ -478,7 +614,6 @@
     transition: background 0.13s, transform 0.12s, color 0.13s;
     min-height: 38px;
   }
-  .icon-btn:hover { background: var(--bg-fill); }
   .icon-btn.danger { color: var(--danger); }
   .icon-btn.danger:hover { background: color-mix(in srgb, var(--danger) 14%, transparent); }
 
@@ -511,14 +646,15 @@
   .specs {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    gap: var(--s2);
+    margin-bottom: var(--s6);
+  }
+  .spec {
+    padding: var(--s4);
     background: var(--bg-panel);
     border-radius: 14px;
-    overflow: hidden;
-    margin-bottom: 30px;
     box-shadow: var(--shadow-1);
   }
-  .spec { padding: 15px 17px; }
-  .spec + .spec { border-left: 0.5px solid var(--hairline); }
   .spec .k {
     font-size: 9.5px;
     letter-spacing: 0.18em;
@@ -540,7 +676,7 @@
   }
 
   .lyrics {
-    font-family: var(--serif);
+    font-family: var(--sans);
     font-size: 16.5px;
     line-height: 1.9;
     white-space: pre-wrap;
@@ -622,7 +758,6 @@
     transition: background 0.13s, transform 0.12s;
     min-height: 38px;
   }
-  .stream-link:hover { background: var(--bg-fill); }
   .stream-link svg { width: 16px; height: 16px; flex-shrink: 0; }
 
   /* ── LYRIC ACTIONS ─────────────────────────────── */
@@ -642,7 +777,6 @@
     white-space: nowrap;
     min-height: 34px;
   }
-  .mini-btn:hover { background: var(--bg-fill); }
   .mini-btn.done { color: var(--ok); }
 
   .audio-block { margin-bottom: 30px; }
@@ -671,24 +805,23 @@
     min-height: 36px;
     transition: background 0.13s, transform 0.12s;
   }
-  .audio-placeholder button:hover { background: var(--bg-fill); }
 
   /* ── HOME SCREEN ─────────────────────────────── */
   .home {
     max-width: 640px;
     margin: 0 auto;
-    padding: 56px 36px 90px;
+    padding: var(--s8) var(--s6) 90px;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
   }
-  .home-logo { width: 82px; height: 82px; object-fit: contain; border-radius: 18px; margin-bottom: 16px; box-shadow: var(--shadow-2); }
+  .home-logo { width: 72px; height: 72px; object-fit: contain; border-radius: 18px; margin-bottom: var(--s4); box-shadow: var(--shadow-2); align-self: flex-start; }
   .home-title {
     font-family: var(--serif);
     font-size: 29px;
     letter-spacing: 0.22em;
     color: var(--text);
-    margin-bottom: 5px;
+    margin-bottom: var(--s1);
     font-weight: 600;
   }
   .home-sub {
@@ -696,43 +829,45 @@
     letter-spacing: 0.32em;
     text-transform: uppercase;
     color: var(--gold-soft);
-    margin-bottom: 36px;
+    margin-bottom: var(--s6);
   }
   .home-new {
     background: linear-gradient(155deg, var(--gold), var(--gold-soft));
     border: none;
     color: #1a150b;
     border-radius: 13px;
-    padding: 14px 36px;
+    padding: var(--s4) var(--s6);
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: filter 0.13s, transform 0.12s;
-    margin-bottom: 44px;
+    transition: filter var(--dur) var(--ease), transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+    margin-bottom: var(--s7);
     min-height: 48px;
   }
-  .home-new:hover { filter: brightness(1.08); }
+  .home-new:hover { filter: brightness(1.08); transform: scale(1.01); box-shadow: var(--shadow-2); }
 
   .home-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 11px;
+    gap: var(--s2);
     width: 100%;
-    margin-bottom: 14px;
+    margin-bottom: var(--s4);
   }
   .stat-card {
     background: var(--bg-panel);
     border-radius: 16px;
-    padding: 18px 12px;
-    text-align: center;
+    padding: var(--s5) var(--s4);
+    text-align: left;
     box-shadow: var(--shadow-1);
   }
   .stat-num {
-    font-family: var(--serif);
+    font-family: var(--sans);
     font-size: 31px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
     color: var(--gold);
     line-height: 1;
-    margin-bottom: 7px;
+    margin-bottom: var(--s2);
   }
   .stat-label {
     font-size: 9.5px;
@@ -746,8 +881,8 @@
     width: 100%;
     background: var(--bg-panel);
     border-radius: 16px;
-    padding: 18px;
-    margin-bottom: 36px;
+    padding: var(--s5);
+    margin-bottom: var(--s7);
     box-shadow: var(--shadow-1);
   }
   .status-bar {
@@ -756,12 +891,12 @@
     border-radius: 4px;
     overflow: hidden;
     background: var(--bg-elev);
-    margin-bottom: 12px;
+    margin-bottom: var(--s3);
   }
   .status-bar .seg-draft { background: var(--draft); }
   .status-bar .seg-production { background: var(--prod); }
   .status-bar .seg-final { background: var(--final); }
-  .status-legend { display: flex; gap: 18px; flex-wrap: wrap; }
+  .status-legend { display: flex; gap: var(--s4); flex-wrap: wrap; }
   .status-legend span { font-size: 11.5px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; }
   .status-legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 
@@ -771,29 +906,31 @@
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--gold);
-    margin-bottom: 12px;
+    margin-bottom: var(--s3);
+    margin-top: var(--s5);
     font-weight: 600;
   }
 
   .recent-list {
     width: 100%;
-    background: var(--bg-panel);
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: var(--shadow-1);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s1);
   }
   .recent-item {
     display: flex;
     align-items: center;
-    gap: 13px;
-    padding: 14px 18px;
+    gap: var(--s3);
+    padding: var(--s3) var(--s4);
+    background: var(--bg-panel);
+    border-radius: 12px;
+    box-shadow: var(--shadow-1);
     cursor: pointer;
-    transition: background 0.13s, transform 0.12s;
-    min-height: 54px;
+    transition: filter var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+    min-height: 56px;
     position: relative;
   }
-  .recent-item + .recent-item { border-top: 0.5px solid var(--hairline); }
-  .recent-item:hover { background: var(--bg-elev); }
+  .recent-item:hover { filter: brightness(1.06); box-shadow: var(--shadow-2); transform: scale(1.01); }
   .recent-item::after {
     content: '\203A';
     color: var(--text-faint);
@@ -833,7 +970,7 @@
     background: var(--bg-fill);
   }
   body.light .field input:focus, body.light .field textarea:focus { background: #fff; }
-  .field textarea.lyric-area { font-family: var(--serif); min-height: 280px; }
+  .field textarea.lyric-area { font-family: var(--sans); min-height: 280px; }
   .field textarea.mono-area { font-family: var(--mono); font-size: 14px; }
   .field .seg { background: var(--bg-elev); }
   .field .seg button { min-height: 36px; font-size: 13px; }
@@ -955,7 +1092,7 @@
     overflow-y: auto;
     box-shadow: var(--shadow-2);
   }
-  .modal h2 { font-family: var(--serif); font-size: 22px; margin-bottom: 6px; font-weight: 600; }
+  .modal h2 { font-family: var(--sans); font-size: 20px; letter-spacing: -0.01em; margin-bottom: var(--s2); font-weight: 600; }
   .modal p { color: var(--text-dim); font-size: 13px; margin-bottom: 16px; line-height: 1.6; }
   .modal textarea {
     width: 100%;
@@ -1027,7 +1164,6 @@
     cursor: pointer;
     min-height: 36px;
   }
-  .perf-btn:hover { background: var(--bg-fill); color: var(--text); }
   .perf-section {
     display: flex;
     gap: 26px;
@@ -1280,6 +1416,7 @@
           <div class="sub">Song Catalog</div>
         </div>
       </div>
+      <button class="collapse-btn" id="collapseBtn" onclick="toggleRail()" aria-label="Collapse sidebar" title="Collapse sidebar">&#9664;</button>
     </div>
     <div class="search-wrap">
       <input id="search" type="text" placeholder="Search titles, lyrics, themes…" oninput="renderSidebar()">
@@ -1440,6 +1577,21 @@ async function compressImage(dataUrl, maxSize=700, quality=0.78) {
 }
 
 // ── SIDEBAR ────────────────────────────────────────────────────────
+const STATUS_CAPS = { draft: 'Draft', production: 'In progress', final: 'Done' };
+function statusCapsule(status) {
+  const st = status || 'draft';
+  return `<span class="status-cap ${st}">${STATUS_CAPS[st] || 'Draft'}</span>`;
+}
+
+function songThumb(s) {
+  const art = s.cover || (s.album ? (getAlbumMeta(s.album) || {}).cover : '');
+  if (art) return `<img class="song-thumb" src="${art}" alt="">`;
+  let h = 0;
+  const key = (s.title || '') + (s.album || '');
+  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) % 360;
+  return `<div class="song-thumb" style="background:linear-gradient(145deg, hsl(${h} 32% 34%), hsl(${(h + 40) % 360} 28% 18%));"></div>`;
+}
+
 function renderSidebar() {
   const list = document.getElementById('songList');
   const q = document.getElementById('search').value.toLowerCase().trim();
@@ -1482,11 +1634,12 @@ function renderSidebar() {
       const num = String(idx).padStart(2, '0');
       html += `<div class="song-item ${s.id === currentId ? 'active' : ''}" onclick="selectSong('${s.id}')">
         <span class="song-num">${num}</span>
+        ${songThumb(s)}
         <div class="song-meta">
           <div class="song-title-s">${esc(s.title || 'Untitled')}</div>
           <div class="song-sub-s">${esc(s.genre || '\u2014')}${s.key ? ' \u00b7 ' + esc(s.key) : ''}${s.bpm ? ' \u00b7 ' + esc(s.bpm) + ' BPM' : ''}</div>
         </div>
-        <span class="status-dot ${s.status || 'draft'}"></span>
+        ${statusCapsule(s.status)}
       </div>`;
     });
     html += `</div>`;
@@ -1554,7 +1707,7 @@ function showHome() {
     recentHtml = `<div class="home-section-label">Recently edited</div>
     <div class="recent-list">` +
     recent.map(s => `<div class="recent-item" onclick="selectSong('${s.id}')">
-      <span class="status-dot ${s.status||'draft'}"></span>
+      ${statusCapsule(s.status)}
       <span class="r-title">${esc(s.title || 'Untitled')}</span>
       <span class="r-sub">${esc(s.album || '')}</span>
     </div>`).join('') + `</div>`;
@@ -2490,6 +2643,22 @@ function applyTheme() {
   document.getElementById('themeIcon').innerHTML = lightMode ? '&#9728;' : '&#9789;';
   document.getElementById('themeLabel').textContent = lightMode ? 'Dark mode' : 'Light mode';
 }
+// ── SIDEBAR COLLAPSE ───────────────────────────────────────────────
+let railMode = localStorage.getItem('shmi_rail') === '1';
+function applyRail() {
+  document.body.classList.toggle('rail', railMode);
+  const b = document.getElementById('collapseBtn');
+  if (b) {
+    b.innerHTML = railMode ? '&#9654;' : '&#9664;';
+    b.title = railMode ? 'Expand sidebar' : 'Collapse sidebar';
+  }
+}
+function toggleRail() {
+  railMode = !railMode;
+  localStorage.setItem('shmi_rail', railMode ? '1' : '0');
+  applyRail();
+}
+
 function toggleTheme() {
   lightMode = !lightMode;
   localStorage.setItem('shmi_theme', lightMode ? 'light' : 'dark');
@@ -2518,6 +2687,7 @@ window.mp3Placeholder = mp3Placeholder;
 window.generateAnalysis = generateAnalysis;
 window.checkPass = checkPass;
 window.toggleTheme = toggleTheme;
+window.toggleRail = toggleRail;
 window.handleCoverUpload = handleCoverUpload;
 window.removeCover = removeCover;
 window.toggleMenu = toggleMenu;
@@ -2543,6 +2713,7 @@ window.loadPerfFromLyrics = loadPerfFromLyrics;
 
 // ── INIT ───────────────────────────────────────────────────────────
 applyTheme();
+applyRail();
 showHome();
 let fsStarted = false;
 onAuthStateChanged(auth, user => {
