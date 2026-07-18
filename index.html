@@ -2711,6 +2711,83 @@ window.editPerfSheet = editPerfSheet;
 window.savePerfSheet = savePerfSheet;
 window.loadPerfFromLyrics = loadPerfFromLyrics;
 
+// ── EDGE SWIPE BACK (iOS-style) ────────────────────────────────────
+function perfIsOpen() { return document.getElementById('perfOverlay').classList.contains('visible'); }
+
+function canGoBack() {
+  if (perfIsOpen()) return true;
+  if (isEditing || isEditingAlbum) return false;
+  return !!(currentId || currentAlbumName);
+}
+
+function goBack() {
+  if (perfIsOpen()) { closePerfView(); return; }
+  if (currentId) {
+    const s = catalog.find(x => x.id === currentId);
+    if (s && s.album) showAlbumDetail(s.album); else goHome();
+    return;
+  }
+  if (currentAlbumName) goHome();
+}
+
+const SWIPE_EDGE = 28, SWIPE_THRESHOLD = 72;
+let swStartX = 0, swStartY = 0, swDx = 0, swActive = false, swTarget = null, swDecided = false;
+
+function swipeSurface() {
+  return perfIsOpen() ? document.getElementById('perfOverlay') : document.querySelector('.detail');
+}
+
+function swipeReset(animate) {
+  if (swTarget) {
+    swTarget.style.transition = animate ? `transform var(--dur) var(--ease), opacity var(--dur) var(--ease)` : 'none';
+    swTarget.style.transform = '';
+    swTarget.style.opacity = '';
+    const el = swTarget;
+    setTimeout(() => { if (el) { el.style.transition = ''; } }, 200);
+  }
+  swActive = false; swDecided = false; swDx = 0; swTarget = null;
+}
+
+document.addEventListener('touchstart', e => {
+  if (e.touches.length !== 1) return;
+  if (isEditing || isEditingAlbum) return;
+  if (document.body.classList.contains('menu-open')) return;
+  const t = e.touches[0];
+  if (t.clientX > SWIPE_EDGE) return;
+  swStartX = t.clientX; swStartY = t.clientY;
+  swActive = true; swDecided = false; swDx = 0;
+  swTarget = canGoBack() ? swipeSurface() : null;
+  if (swTarget) swTarget.style.transition = 'none';
+}, { passive: true });
+
+document.addEventListener('touchmove', e => {
+  if (!swActive) return;
+  const t = e.touches[0];
+  const dx = t.clientX - swStartX;
+  const dy = t.clientY - swStartY;
+  if (!swDecided) {
+    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) { swipeReset(false); return; }
+    if (Math.abs(dx) > 10) swDecided = true;
+  }
+  swDx = Math.max(0, dx);
+  if (swDecided && swTarget) {
+    swTarget.style.transform = `translateX(${swDx * 0.55}px)`;
+    swTarget.style.opacity = String(1 - Math.min(swDx / 420, 0.35));
+  }
+}, { passive: true });
+
+document.addEventListener('touchend', () => {
+  if (!swActive) return;
+  const passed = swDx > SWIPE_THRESHOLD;
+  const hadTarget = !!swTarget;
+  swipeReset(true);
+  if (!passed) return;
+  if (hadTarget) goBack();
+  else if (!canGoBack()) toggleMenu();
+}, { passive: true });
+
+document.addEventListener('touchcancel', () => { if (swActive) swipeReset(true); }, { passive: true });
+
 // ── INIT ───────────────────────────────────────────────────────────
 applyTheme();
 applyRail();
