@@ -975,6 +975,136 @@
   .modal-foot { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
   .modal-foot .btn { flex: 0 0 auto; padding: 10px 22px; }
 
+  /* ── PERFORMANCE VIEW ──────────────────────── */
+  .perf-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: var(--bg);
+    display: none;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .perf-overlay.visible { display: block; }
+  .perf-inner {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 26px 24px 90px;
+    padding-top: calc(26px + env(safe-area-inset-top));
+  }
+  .perf-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    border-bottom: 1px solid var(--hairline);
+    padding-bottom: 16px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+  .perf-title-wrap { min-width: 0; }
+  .perf-title {
+    font-family: var(--serif);
+    font-size: calc(26px * var(--perf-scale, 1));
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .perf-meta {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 5px;
+  }
+  .perf-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+  .perf-btn {
+    background: var(--bg-elev);
+    border: none;
+    border-radius: 9px;
+    padding: 8px 13px;
+    font-size: 13px;
+    color: var(--text-dim);
+    cursor: pointer;
+    min-height: 36px;
+  }
+  .perf-btn:hover { background: var(--bg-fill); color: var(--text); }
+  .perf-section {
+    display: flex;
+    gap: 26px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .perf-label-wrap { width: 120px; flex-shrink: 0; }
+  .perf-label {
+    font-size: calc(14px * var(--perf-scale, 1));
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding-bottom: 5px;
+    border-bottom: 2px solid currentColor;
+    display: inline-block;
+  }
+  .perf-hint {
+    display: block;
+    font-size: calc(12px * var(--perf-scale, 1));
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+  .perf-verse { color: #5b82c7; }
+  .perf-pre { color: #9a6fc7; }
+  .perf-chorus { color: #5f9e6e; }
+  .perf-bridge { color: #c78a4a; }
+  .perf-other { color: var(--gold); }
+  .perf-lines { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+  .perf-line { display: flex; gap: 18px; align-items: baseline; }
+  .perf-lyric {
+    flex: 1;
+    font-size: calc(21px * var(--perf-scale, 1));
+    line-height: 1.35;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .perf-note {
+    width: 150px;
+    flex-shrink: 0;
+    font-size: calc(13px * var(--perf-scale, 1));
+    line-height: 1.4;
+    color: var(--text-dim);
+    text-align: left;
+  }
+  .perf-note.accent { color: #9a6fc7; }
+  .perf-edit-area {
+    width: 100%;
+    min-height: 55vh;
+    background: var(--bg-elev);
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.7;
+    outline: none;
+    resize: vertical;
+  }
+  .perf-edit-help {
+    font-size: 12.5px;
+    color: var(--text-faint);
+    margin: 12px 0 16px;
+    line-height: 1.6;
+  }
+  @media (max-width: 760px) {
+    .perf-inner { padding: 18px 16px 70px; padding-top: calc(18px + env(safe-area-inset-top)); }
+    .perf-section { flex-direction: column; gap: 12px; padding: 18px 0; }
+    .perf-label-wrap { width: auto; }
+    .perf-line { flex-wrap: wrap; gap: 4px 14px; }
+    .perf-lyric { flex-basis: 100%; font-size: calc(19px * var(--perf-scale, 1)); }
+    .perf-note { width: auto; margin-left: auto; text-align: right; }
+  }
+
   /* ── TOAST ─────────────────────────────────── */
   .toast {
     position: fixed;
@@ -1183,6 +1313,9 @@
     </div>
   </div>
 </div>
+
+<!-- PERFORMANCE VIEW -->
+<div class="perf-overlay" id="perfOverlay"></div>
 
 <div class="toast" id="toast"></div>
 
@@ -1502,6 +1635,7 @@ function renderAlbumPage(name) {
         <div class="track-sub">${t.duration ? esc(t.duration) + ' · ' : ''}${esc(pipelineLabel(t.pipelineStatus))}</div>
       </div>
       <span class="badge pipeline-${t.pipelineStatus || 'idea'}">${esc(pipelineLabel(t.pipelineStatus))}</span>
+      <button class="perf-btn" style="flex-shrink:0;" onclick="event.stopPropagation(); openPerfViewFor('${t.id}')" title="Performance view">♪</button>
     </div>`).join('') : `<div style="color:var(--text-faint);font-size:13.5px;padding:20px 0;">No songs in this album yet.</div>`;
 
   document.getElementById('detail').innerHTML = `
@@ -1689,6 +1823,142 @@ function cancelAlbumEdit() {
   if (currentAlbumName) showAlbumDetail(currentAlbumName); else showHome();
 }
 
+// ── PERFORMANCE VIEW ───────────────────────────────────────────────
+let perfScale = parseFloat(localStorage.getItem('shmi_perf_scale')) || 1;
+
+function perfSectionClass(label) {
+  const l = label.toLowerCase();
+  if (l.includes('pre')) return 'perf-pre';
+  if (l.includes('chorus') || l.includes('hook') || l.includes('refrain')) return 'perf-chorus';
+  if (l.includes('bridge')) return 'perf-bridge';
+  if (l.includes('verse')) return 'perf-verse';
+  return 'perf-other';
+}
+
+function parsePerfSheet(text) {
+  const sections = [];
+  let cur = null;
+  String(text || '').split('\n').forEach(raw => {
+    const line = raw.trim();
+    if (!line) return;
+    const m = line.match(/^\[([^\]]+)\]\s*(?:\(([^)]*)\))?$/);
+    if (m) { cur = { label: m[1], hint: m[2] || '', lines: [] }; sections.push(cur); return; }
+    if (!cur) { cur = { label: '', hint: '', lines: [] }; sections.push(cur); }
+    const idx = line.indexOf('|');
+    if (idx >= 0) cur.lines.push({ text: line.slice(0, idx).trim(), note: line.slice(idx + 1).trim() });
+    else cur.lines.push({ text: line, note: '' });
+  });
+  return sections;
+}
+
+function openPerfViewFor(id) {
+  currentId = id;
+  currentAlbumName = null;
+  showDetail();
+  renderSidebar();
+  closeMenu();
+  openPerfView();
+}
+
+function openPerfView() {
+  const s = catalog.find(x => x.id === currentId);
+  if (!s) return;
+  const sheet = (s.perfSheet && s.perfSheet.trim()) ? s.perfSheet : (s.lyrics || '');
+  const sections = parsePerfSheet(sheet);
+  document.documentElement.style.setProperty('--perf-scale', perfScale);
+
+  const meta = [s.key ? 'Key: ' + esc(s.key) : '', s.bpm ? 'Tempo: ' + esc(s.bpm) + ' BPM' : '', s.vocal ? esc(s.vocal) : ''].filter(Boolean).join('  |  ');
+
+  let body = '';
+  if (!sections.length) {
+    body = `<div style="padding:40px 0;color:var(--text-faint);font-size:14px;">No lyrics yet. Add lyrics to the song, or press Edit to write the performance sheet directly.</div>`;
+  } else {
+    body = sections.map(sec => `
+      <div class="perf-section">
+        <div class="perf-label-wrap">
+          ${sec.label ? `<span class="perf-label ${perfSectionClass(sec.label)}">${esc(sec.label)}${sec.hint ? `<span class="perf-hint">(${esc(sec.hint)})</span>` : ''}</span>` : ''}
+        </div>
+        <div class="perf-lines">
+          ${sec.lines.map(l => `<div class="perf-line"><div class="perf-lyric">${esc(l.text)}</div>${l.note ? `<div class="perf-note ${/breath|\(/.test(l.note) ? 'accent' : ''}">${esc(l.note)}</div>` : ''}</div>`).join('')}
+        </div>
+      </div>`).join('');
+  }
+
+  document.getElementById('perfOverlay').innerHTML = `
+  <div class="perf-inner">
+    <div class="perf-head">
+      <div class="perf-title-wrap">
+        <div class="perf-title">${esc(s.title || 'Untitled')}</div>
+        ${meta ? `<div class="perf-meta">${meta}</div>` : ''}
+      </div>
+      <div class="perf-controls">
+        <button class="perf-btn" onclick="perfFont(-1)">A−</button>
+        <button class="perf-btn" onclick="perfFont(1)">A+</button>
+        <button class="perf-btn" onclick="toggleTheme()">☾ / ☀</button>
+        <button class="perf-btn" onclick="editPerfSheet()">Edit</button>
+        <button class="perf-btn" onclick="closePerfView()">✕ Close</button>
+      </div>
+    </div>
+    ${body}
+  </div>`;
+  document.getElementById('perfOverlay').classList.add('visible');
+  document.getElementById('perfOverlay').scrollTop = 0;
+}
+
+function closePerfView() {
+  document.getElementById('perfOverlay').classList.remove('visible');
+}
+
+function perfFont(dir) {
+  perfScale = Math.min(1.6, Math.max(0.7, perfScale + dir * 0.1));
+  localStorage.setItem('shmi_perf_scale', perfScale);
+  document.documentElement.style.setProperty('--perf-scale', perfScale);
+}
+
+function editPerfSheet() {
+  const s = catalog.find(x => x.id === currentId);
+  if (!s) return;
+  const sheet = (s.perfSheet && s.perfSheet.trim()) ? s.perfSheet : (s.lyrics || '');
+  document.getElementById('perfOverlay').innerHTML = `
+  <div class="perf-inner">
+    <div class="perf-head">
+      <div class="perf-title-wrap"><div class="perf-title">${esc(s.title || 'Untitled')} — edit sheet</div></div>
+      <div class="perf-controls">
+        <button class="perf-btn" onclick="loadPerfFromLyrics()">Reset from lyrics</button>
+        <button class="perf-btn" onclick="savePerfSheet()">Save</button>
+        <button class="perf-btn" onclick="openPerfView()">Cancel</button>
+      </div>
+    </div>
+    <div class="perf-edit-help">
+      Each line: <b>lyric text | performance note</b> (the note is optional).
+      Section headers: <b>[Verse 1] (intimate)</b> — the part in parentheses is the delivery hint.
+      Notes like <b>(breath)</b> or <b>/</b> mark breathing and pauses.
+    </div>
+    <textarea class="perf-edit-area" id="perfEditArea">${esc(sheet)}</textarea>
+  </div>`;
+}
+
+function loadPerfFromLyrics() {
+  const s = catalog.find(x => x.id === currentId);
+  if (!s) return;
+  if (!confirm('Replace the sheet with the current lyrics? Your performance notes will be lost.')) return;
+  document.getElementById('perfEditArea').value = s.lyrics || '';
+}
+
+async function savePerfSheet() {
+  const s = catalog.find(x => x.id === currentId);
+  if (!s) return;
+  const text = val('perfEditArea');
+  try {
+    showToast('Saving…', 'success');
+    s.perfSheet = text;
+    const { id, ...data } = s;
+    await writeToFirestore(id, data);
+    showToast('Saved ✓', 'success');
+    openPerfView();
+  } catch(e) { showToast('Save failed: ' + (e.code || e.message || 'check connection'), 'error'); }
+}
+
 function renderCredits(s) {
   if (!s.credits || !s.credits.length) return '';
   return `<div class="section"><div class="section-label">Credits</div><div class="credits-list">${
@@ -1719,6 +1989,7 @@ function showDetail() {
     <div class="detail-head">
       <h1 class="detail-title">${esc(s.title || 'Untitled')}</h1>
       <div class="detail-actions">
+        <button class="icon-btn" onclick="openPerfView()">♪ Perform</button>
         <button class="icon-btn" onclick="editSong()">Edit</button>
         <button class="icon-btn danger" onclick="deleteSong()">Delete</button>
       </div>
@@ -1841,7 +2112,7 @@ function mp3Placeholder() { showToast('MP3 upload coming in the cloud version', 
 // ── EDIT FORM ──────────────────────────────────────────────────────
 function newSong() {
   if (isEditing) { if (!confirm('Discard unsaved changes?')) return; }
-  editBuffer = { id: uid(), title:'', vocal:'Intimate female', status:'draft', pipelineStatus:'idea', album:'', bpm:'', key:'', duration:'', genre:'', lyrics:'', suno:'', sunoNegative:'', production:'', instruments:'', chords:'', analysis:'', cover:'', spotify:'', apple:'', youtube:'', soundcloud:'', deezer:'', audioName:'', credits:[], sokojStatus:'not-filed', vocalistMasterPct:'', crossCatalogEcho:'', lyricsHistory:[], trackNumber: null, createdAt: Date.now() };
+  editBuffer = { id: uid(), title:'', vocal:'Intimate female', status:'draft', pipelineStatus:'idea', album:'', bpm:'', key:'', duration:'', genre:'', lyrics:'', suno:'', sunoNegative:'', production:'', instruments:'', chords:'', analysis:'', cover:'', spotify:'', apple:'', youtube:'', soundcloud:'', deezer:'', audioName:'', credits:[], sokojStatus:'not-filed', vocalistMasterPct:'', crossCatalogEcho:'', lyricsHistory:[], trackNumber: null, perfSheet:'', createdAt: Date.now() };
   currentId = editBuffer.id;
   isEditing = true;
   showEditForm(editBuffer);
@@ -2073,6 +2344,7 @@ async function doImport() {
         credits:s.credits||[], sokojStatus:s.sokojStatus||'not-filed',
         vocalistMasterPct:s.vocalistMasterPct!=null?s.vocalistMasterPct:'', crossCatalogEcho:s.crossCatalogEcho||'',
         lyricsHistory:s.lyricsHistory||[], trackNumber:s.trackNumber!=null?s.trackNumber:null,
+        perfSheet:s.perfSheet||'',
         createdAt:s.createdAt||Date.now(), updatedAt:Date.now()
       };
       await writeToFirestore(id, clean);
@@ -2205,6 +2477,13 @@ window.moveTrackDown = moveTrackDown;
 window.newSongInAlbum = newSongInAlbum;
 window.handleAlbumCoverUpload = handleAlbumCoverUpload;
 window.removeAlbumCover = removeAlbumCover;
+window.openPerfView = openPerfView;
+window.openPerfViewFor = openPerfViewFor;
+window.closePerfView = closePerfView;
+window.perfFont = perfFont;
+window.editPerfSheet = editPerfSheet;
+window.savePerfSheet = savePerfSheet;
+window.loadPerfFromLyrics = loadPerfFromLyrics;
 
 // ── INIT ───────────────────────────────────────────────────────────
 applyTheme();
