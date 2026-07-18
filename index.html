@@ -225,6 +225,31 @@
   }
   body.light .seg button.on { background: #fff; }
 
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 14px 12px;
+  }
+  .chip {
+    background: var(--bg-elev);
+    border: none;
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .chip.on {
+    background: var(--bg-fill);
+    color: var(--text);
+    font-weight: 600;
+    box-shadow: var(--shadow-1);
+  }
+  body.light .chip.on { background: #fff; }
+
   .song-list {
     flex: 1;
     overflow-y: auto;
@@ -1051,6 +1076,7 @@
         <button onclick="seg(this,'final')">Final</button>
       </div>
     </div>
+    <div class="chip-row" id="albumFilters"></div>
     <div class="song-list" id="songList"></div>
     <div class="sidebar-foot">
       <button class="btn btn-primary" onclick="newSong()">+ New song</button>
@@ -1115,6 +1141,7 @@ const auth = getAuth(app);
 // ── STATE ──────────────────────────────────────────────────────────
 let catalog = [];
 let currentId = null;
+let filterAlbum = '';
 let isEditing = false;
 let editBuffer = null;
 
@@ -1179,9 +1206,16 @@ function renderSidebar() {
   const fv = document.getElementById('filterVocal').dataset.value || '';
   const fs = document.getElementById('filterStatus').dataset.value || '';
 
+  renderAlbumFilters();
+
   let filtered = catalog.filter(s => {
     if (fv && s.vocal !== fv) return false;
     if (fs && s.status !== fs) return false;
+    if (filterAlbum) {
+      const album = (s.album || '').trim();
+      if (filterAlbum === 'Unsorted') { if (album) return false; }
+      else if (album !== filterAlbum) return false;
+    }
     if (q) {
       const hay = [s.title, s.lyrics, s.album, s.genre, s.analysis, s.instruments].join(' ').toLowerCase();
       if (!hay.includes(q)) return false;
@@ -1215,6 +1249,25 @@ function renderSidebar() {
     html += `</div>`;
   });
   list.innerHTML = html;
+}
+
+function renderAlbumFilters() {
+  const el = document.getElementById('albumFilters');
+  const albums = new Set();
+  let hasUnsorted = false;
+  catalog.forEach(s => { const a = (s.album || '').trim(); if (a) albums.add(a); else hasUnsorted = true; });
+  const sorted = Array.from(albums).sort((a, b) => a.localeCompare(b));
+  if (hasUnsorted) sorted.push('Unsorted');
+  let html = `<button class="chip ${filterAlbum === '' ? 'on' : ''}" onclick="filterByAlbum('')">All</button>`;
+  sorted.forEach(a => {
+    html += `<button class="chip ${filterAlbum === a ? 'on' : ''}" data-album="${escAttr(a)}" onclick="filterByAlbum(this.dataset.album)">${esc(a)}</button>`;
+  });
+  el.innerHTML = html;
+}
+
+function filterByAlbum(album) {
+  filterAlbum = album;
+  renderSidebar();
 }
 
 function selectSong(id) {
@@ -1689,6 +1742,7 @@ function toggleTheme() {
 
 // ── EXPOSE TO WINDOW (module scope requires this for onclick handlers) ──
 window.renderSidebar = renderSidebar;
+window.filterByAlbum = filterByAlbum;
 window.selectSong = selectSong;
 window.newSong = newSong;
 window.editSong = editSong;
