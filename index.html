@@ -2727,7 +2727,22 @@ function canGoBack() {
 
 // Back is routed through browser history, so the macOS two-finger
 // trackpad swipe, the back button and Cmd+[ all drive the same path.
-function goBack() { history.back(); }
+let lastBackAt = 0;
+function goBack() {
+  const now = Date.now();
+  if (now - lastBackAt < 400) return;
+  lastBackAt = now;
+  history.back();
+}
+
+// Only Safari on the home screen (standalone display-mode) has no
+// native edge-swipe-back of its own — that's the one case our custom
+// gesture doesn't fight with. In a regular browser tab, Safari's own
+// edge swipe already drives real history now that we push state, so
+// adding ours on top double-fires "back" and skips a level.
+function isStandalone() {
+  return window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+}
 
 // ── HISTORY ROUTING ────────────────────────────────────────────────
 let suppressHistory = false;
@@ -2794,45 +2809,47 @@ function swipeReset(animate) {
   swActive = false; swDecided = false; swDx = 0; swTarget = null;
 }
 
-document.addEventListener('touchstart', e => {
-  if (e.touches.length !== 1) return;
-  if (isEditing || isEditingAlbum) return;
-  if (document.body.classList.contains('menu-open')) return;
-  const t = e.touches[0];
-  if (t.clientX > SWIPE_EDGE) return;
-  swStartX = t.clientX; swStartY = t.clientY;
-  swActive = true; swDecided = false; swDx = 0;
-  swTarget = canGoBack() ? swipeSurface() : null;
-  if (swTarget) swTarget.style.transition = 'none';
-}, { passive: true });
+if (isStandalone()) {
+  document.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1) return;
+    if (isEditing || isEditingAlbum) return;
+    if (document.body.classList.contains('menu-open')) return;
+    const t = e.touches[0];
+    if (t.clientX > SWIPE_EDGE) return;
+    swStartX = t.clientX; swStartY = t.clientY;
+    swActive = true; swDecided = false; swDx = 0;
+    swTarget = canGoBack() ? swipeSurface() : null;
+    if (swTarget) swTarget.style.transition = 'none';
+  }, { passive: true });
 
-document.addEventListener('touchmove', e => {
-  if (!swActive) return;
-  const t = e.touches[0];
-  const dx = t.clientX - swStartX;
-  const dy = t.clientY - swStartY;
-  if (!swDecided) {
-    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) { swipeReset(false); return; }
-    if (Math.abs(dx) > 10) swDecided = true;
-  }
-  swDx = Math.max(0, dx);
-  if (swDecided && swTarget) {
-    swTarget.style.transform = `translateX(${swDx * 0.55}px)`;
-    swTarget.style.opacity = String(1 - Math.min(swDx / 420, 0.35));
-  }
-}, { passive: true });
+  document.addEventListener('touchmove', e => {
+    if (!swActive) return;
+    const t = e.touches[0];
+    const dx = t.clientX - swStartX;
+    const dy = t.clientY - swStartY;
+    if (!swDecided) {
+      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) { swipeReset(false); return; }
+      if (Math.abs(dx) > 10) swDecided = true;
+    }
+    swDx = Math.max(0, dx);
+    if (swDecided && swTarget) {
+      swTarget.style.transform = `translateX(${swDx * 0.55}px)`;
+      swTarget.style.opacity = String(1 - Math.min(swDx / 420, 0.35));
+    }
+  }, { passive: true });
 
-document.addEventListener('touchend', () => {
-  if (!swActive) return;
-  const passed = swDx > SWIPE_THRESHOLD;
-  const hadTarget = !!swTarget;
-  swipeReset(true);
-  if (!passed) return;
-  if (hadTarget) goBack();
-  else if (!canGoBack()) toggleMenu();
-}, { passive: true });
+  document.addEventListener('touchend', () => {
+    if (!swActive) return;
+    const passed = swDx > SWIPE_THRESHOLD;
+    const hadTarget = !!swTarget;
+    swipeReset(true);
+    if (!passed) return;
+    if (hadTarget) goBack();
+    else if (!canGoBack()) toggleMenu();
+  }, { passive: true });
 
-document.addEventListener('touchcancel', () => { if (swActive) swipeReset(true); }, { passive: true });
+  document.addEventListener('touchcancel', () => { if (swActive) swipeReset(true); }, { passive: true });
+}
 
 // ── INIT ───────────────────────────────────────────────────────────
 history.replaceState({ view: 'home' }, '');
