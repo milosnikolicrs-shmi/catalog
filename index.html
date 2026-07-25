@@ -1419,6 +1419,7 @@
     <span>SHMI</span>
   </button>
 </div>
+
 <div class="sidebar-backdrop" onclick="closeMenu()"></div>
 
 <div class="app">
@@ -1470,7 +1471,7 @@
 <div class="modal-overlay" id="importModal">
   <div class="modal">
     <h2>Import catalog</h2>
-    <p>Paste a catalog backup from this app, or a JSON song list. Import replaces the current songs and album metadata.</p>
+    <p>Paste a single song, a list of songs, or a full catalog backup. New songs are added to your catalog and songs matching an existing ID are updated &mdash; nothing existing is ever deleted. Songs without an album go to Unsorted.</p>
     <textarea id="importText" placeholder='[ { "title": "…", "lyrics": "…" } ]'></textarea>
     <div class="modal-foot">
       <button class="btn" onclick="closeImport()">Cancel</button>
@@ -2087,7 +2088,7 @@ function openPerfView() {
   const sections = parsePerfSheet(sheet);
   document.documentElement.style.setProperty('--perf-scale', perfScale);
 
-  const meta = [s.key ? 'Key: ' + esc(s.key) : '', s.bpm ? 'Tempo: ' + esc(s.bpm) + ' BPM' : '', s.vocal ? esc(s.vocal) : ''].filter(Boolean).join('  |  ');
+  const meta = [s.key ? 'Key: ' + esc(s.key) : '', s.bpm ? 'Tempo: ' + esc(s.bpm) + ' BPM' : '', s.vocal ? esc(s.vocal) : ''].filter(Boolean).join('  |  ');
 
   let body = '';
   if (!sections.length) {
@@ -2584,20 +2585,15 @@ async function doImport() {
       throw new Error('Unsupported backup format');
     }
 
-    const seenLyrics = new Set();
-    const dups = data.filter(s => {
-      const normalized = normLyrics(s.lyrics);
-      if (!normalized || normalized.length < 40) return false;
-      if (seenLyrics.has(normalized)) return true;
-      seenLyrics.add(normalized);
-      return false;
-    });
-    if (dups.length) {
-      const names = dups.map(s => s.title || 'Untitled').join(', ');
-      if (!confirm(`${dups.length} duplicate lyric entr${dups.length === 1 ? 'y was' : 'ies were'} found in this backup: ${names}.\n\nImport anyway?`)) return;
+    // Duplicate check: compare each imported song's lyrics against the
+    // EXISTING catalog (a song updating itself by matching id is not a duplicate).
+    const dupPairs = data
+      .map(s => ({ imported: s, existing: findDuplicate(s.lyrics, s.id) }))
+      .filter(p => p.existing);
+    if (dupPairs.length) {
+      const names = dupPairs.map(p => `"${p.imported.title || 'Untitled'}" matches existing "${p.existing.title || 'Untitled'}"`).join('; ');
+      if (!confirm(`${dupPairs.length} song${dupPairs.length!==1?'s':''} in this import already exist in the catalog with the same lyrics: ${names}.\n\nImport anyway?`)) return;
     }
-
-    if (!confirm(`Replace the current catalog with ${data.length} song${data.length!==1?'s':''} and ${importedAlbums.length} album record${importedAlbums.length===1?'':'s'}?\n\nThis cannot be undone unless you have a backup.`)) return;
 
     const preparedSongs = data.map(s => {
       const id = s.id || uid();
@@ -2613,24 +2609,21 @@ async function doImport() {
         vocalistMasterPct:s.vocalistMasterPct!=null?s.vocalistMasterPct:'', crossCatalogEcho:s.crossCatalogEcho||'',
         lyricsHistory:s.lyricsHistory||[], trackNumber:s.trackNumber!=null?s.trackNumber:null,
         perfSheet:s.perfSheet||'',
-        createdAt:s.createdAt||Date.now(), updatedAt:s.updatedAt||Date.now()
+        createdAt:s.createdAt||Date.now(), updatedAt:Date.now()
       }};
     });
     const preparedAlbums = importedAlbums
       .filter(a => a && String(a.name || '').trim())
       .map(({ id, ...album }) => ({ ...album, name: String(album.name).trim(), referenceSheetUrl: safeExternalUrl(album.referenceSheetUrl) }));
 
-    showToast(`Importing ${preparedSongs.length} song${preparedSongs.length!==1?'s':''}\u2026`, 'success');
+    // Merge: add new songs, update existing ones by id. Nothing already
+    // in the catalog is ever deleted by an import.
+    showToast(`Adding ${preparedSongs.length} song${preparedSongs.length!==1?'s':''}\u2026`, 'success');
     for (const { id, clean } of preparedSongs) await writeToFirestore(id, clean);
     for (const album of preparedAlbums) await writeAlbumToFirestore(album.name, album);
 
-    const importedSongIds = new Set(preparedSongs.map(s => s.id));
-    const importedAlbumIds = new Set(preparedAlbums.map(a => albumSlug(a.name)));
-    await Promise.all(catalog.filter(s => !importedSongIds.has(s.id)).map(s => removeFromFirestore(s.id)));
-    await Promise.all(albumsData.filter(a => !importedAlbumIds.has(a.id)).map(a => removeAlbumFromFirestore(a.id)));
-
     closeImport();
-    showToast(`Imported ${preparedSongs.length} song${preparedSongs.length!==1?'s':''} \u2713`, 'success');
+    showToast(`Added ${preparedSongs.length} song${preparedSongs.length!==1?'s':''} \u2713`, 'success');
   } catch(e) { showToast('Import failed \u2014 check the backup format and connection', 'error'); }
 }
 
