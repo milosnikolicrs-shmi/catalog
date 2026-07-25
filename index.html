@@ -573,18 +573,6 @@
     padding: 64px 40px 90px;
   }
 
-  .empty {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-faint);
-    gap: 10px;
-    padding: 20px;
-    text-align: center;
-  }
-
   .back-btn {
     display: inline-flex;
     align-items: center;
@@ -596,10 +584,9 @@
     cursor: pointer;
     padding: 6px 0;
     margin-bottom: 10px;
-    transition: opacity 0.13s, transform 0.12s;
+    transition: color var(--dur) var(--ease), transform var(--dur) var(--ease);
     font-weight: 500;
   }
-  .back-btn { transition: color var(--dur) var(--ease); }
   .back-btn:hover { color: var(--gold-hover); }
   button.album-label:hover { color: var(--gold-hover); }
 
@@ -1316,10 +1303,6 @@
     z-index: 44;
   }
 
-  ::-webkit-scrollbar { width: 9px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--bg-fill); border-radius: 6px; border: 2.5px solid var(--bg); }
-
   /* ── MOBILE ─────────────────────────────────── */
   @media (max-width: 760px) {
     :root { --topbar-h: calc(52px + env(safe-area-inset-top)); }
@@ -1367,7 +1350,6 @@
     .analysis-head { flex-direction: column; align-items: stretch; }
     .ai-btn { min-height: 44px; }
 
-    .empty { padding-top: var(--topbar-h); }
     .home { padding: 28px 18px 70px; }
     .home-logo { width: 66px; height: 66px; }
     .home-title { font-size: 23px; }
@@ -1460,6 +1442,7 @@
     </div>
     <div class="sidebar-foot theme-foot">
       <button class="btn theme-btn" onclick="toggleTheme()"><span id="themeIcon">&#9789;</span> <span id="themeLabel">Light mode</span></button>
+      <button class="btn" onclick="signOutNow()" title="Sign out"><span>Sign out</span></button>
     </div>
   </aside>
 
@@ -1468,7 +1451,7 @@
 </div>
 
 <!-- IMPORT MODAL -->
-<div class="modal-overlay" id="importModal">
+<div class="modal-overlay" id="importModal" onclick="if(event.target===this)closeImport()">
   <div class="modal">
     <h2>Import catalog</h2>
     <p>Paste a single song, a list of songs, or a full catalog backup. New songs are added to your catalog and songs matching an existing ID are updated &mdash; nothing existing is ever deleted. Songs without an album go to Unsorted.</p>
@@ -1481,7 +1464,7 @@
 </div>
 
 <!-- EXPORT MODAL -->
-<div class="modal-overlay" id="exportModal">
+<div class="modal-overlay" id="exportModal" onclick="if(event.target===this)closeExport()">
   <div class="modal">
     <h2>Export catalog</h2>
     <p>Copy this JSON as a backup, or to move your catalog elsewhere.</p>
@@ -1501,7 +1484,7 @@
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js';
 import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js';
 
 // ── FIREBASE ───────────────────────────────────────────────────────
 const firebaseConfig = {
@@ -1526,16 +1509,39 @@ let isEditing = false;
 let editBuffer = null;
 let albumEditBuffer = null;
 let isEditingAlbum = false;
+let isEditingPerf = false;
+
+// Single guard for every "you have unsaved work" exit path. Returns false
+// when the user chooses to stay; clears all edit state when they discard.
+function confirmDiscard() {
+  if (!isEditing && !isEditingAlbum && !isEditingPerf) return true;
+  if (!confirm('Discard unsaved changes?')) return false;
+  isEditing = false; editBuffer = null; pendingCover = null;
+  isEditingAlbum = false; albumEditBuffer = null; pendingAlbumCover = null;
+  isEditingPerf = false; perfEditEntries = null;
+  return true;
+}
 
 // ── FIRESTORE SYNC ─────────────────────────────────────────────────
+// Kept so the listeners can be detached on sign-out and cleanly
+// re-attached if a different user signs back in.
+let unsubSongs = null, unsubAlbums = null;
+let fsStarted = false;
+
+function stopFirestore() {
+  if (unsubSongs) { unsubSongs(); unsubSongs = null; }
+  if (unsubAlbums) { unsubAlbums(); unsubAlbums = null; }
+  fsStarted = false;
+}
+
 function initFirestore() {
   const songsCol = collection(db, 'songs');
-  onSnapshot(songsCol, (snapshot) => {
+  unsubSongs = onSnapshot(songsCol, (snapshot) => {
     catalog = [];
     snapshot.forEach(d => catalog.push({ id: d.id, ...d.data() }));
     catalog.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
     renderSidebar();
-    if (!isEditing && !isEditingAlbum) {
+    if (!isEditing && !isEditingAlbum && !isEditingPerf) {
       if (currentAlbumName) {
         showAlbumDetail(currentAlbumName);
       } else if (currentId) {
@@ -1546,13 +1552,13 @@ function initFirestore() {
         showHome();
       }
     }
-  }, () => { showToast('Connection error — check network', 'error'); });
+  }, (err) => { showToast('Songs sync error: ' + (err.code || err.message), 'error'); });
 
   const albumsCol = collection(db, 'albums');
-  onSnapshot(albumsCol, (snapshot) => {
+  unsubAlbums = onSnapshot(albumsCol, (snapshot) => {
     albumsData = [];
     snapshot.forEach(d => albumsData.push({ id: d.id, ...d.data() }));
-    if (!isEditing && !isEditingAlbum && currentAlbumName) showAlbumDetail(currentAlbumName);
+    if (!isEditing && !isEditingAlbum && !isEditingPerf && currentAlbumName) showAlbumDetail(currentAlbumName);
   }, (err) => { showToast('Albums sync error: ' + (err.code || err.message), 'error'); });
 }
 
@@ -1560,14 +1566,17 @@ async function writeToFirestore(id, data) { await setDoc(doc(db, 'songs', id), d
 async function removeFromFirestore(id) { await deleteDoc(doc(db, 'songs', id)); }
 function albumSlug(name) { return String(name || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'unsorted'; }
 async function writeAlbumToFirestore(name, data) { await setDoc(doc(db, 'albums', albumSlug(name)), data); }
-async function removeAlbumFromFirestore(id) { await deleteDoc(doc(db, 'albums', id)); }
 function getAlbumMeta(name) { return albumsData.find(a => a.name === name) || null; }
 
 function uid() { return 's_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); }
 
 function normalizeHttpsUrl(value, label) {
-  const raw = String(value || '').trim();
+  let raw = String(value || '').trim();
   if (!raw) return '';
+  // A pasted "open.spotify.com/..." is a URL the user meant as https —
+  // upgrade it rather than rejecting it. Anything that names another
+  // protocol explicitly still has to be https.
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(raw)) raw = 'https://' + raw;
   try {
     const url = new URL(raw);
     if (url.protocol !== 'https:') throw new Error();
@@ -1586,6 +1595,11 @@ function safeExternalUrl(value) {
 function normLyrics(t) {
   return String(t || '').toLowerCase().replace(/\[[^\]]*\]/g, '').replace(/[^a-z0-9]/g, '');
 }
+const LYRICS_HISTORY_MAX = 20;
+// Covers above this compress on import; already-compressed ones are left
+// alone so repeated export/import cycles don't degrade them.
+const COVER_RECOMPRESS_OVER = 200000;
+
 function findDuplicate(lyrics, excludeId) {
   const n = normLyrics(lyrics);
   if (!n || n.length < 40) return null;
@@ -1607,15 +1621,21 @@ async function compressImage(dataUrl, maxSize=700, quality=0.78) {
       c.getContext('2d').drawImage(img, 0, 0, w, h);
       resolve(c.toDataURL('image/jpeg', quality));
     };
+    // Without this a broken image left the promise pending forever and the
+    // save hung on "Saving…". Fall back to the original data instead.
+    img.onerror = () => resolve(dataUrl);
     img.src = dataUrl;
   });
 }
 
 // ── SIDEBAR ────────────────────────────────────────────────────────
-const STATUS_CAPS = { draft: 'Draft', production: 'In progress', final: 'Done' };
+// One source of truth — the sidebar, the detail badge and the home legend
+// must not invent their own words for the same three states.
+const STATUS_LABELS = { draft: 'Draft', production: 'In production', final: 'Final' };
+function statusLabel(status) { return STATUS_LABELS[status] || STATUS_LABELS.draft; }
 function statusCapsule(status) {
   const st = status || 'draft';
-  return `<span class="status-cap ${st}">${STATUS_CAPS[st] || 'Draft'}</span>`;
+  return `<span class="status-cap ${st}">${statusLabel(st)}</span>`;
 }
 
 function songThumb(s) {
@@ -1658,8 +1678,15 @@ function renderSidebar() {
   const groups = {};
   filtered.forEach(s => { const a = s.album || 'Unsorted'; (groups[a] = groups[a] || []).push(s); });
 
+  // Same order as the album chips: alphabetical, Unsorted last.
+  const groupNames = Object.keys(groups).sort((a, b) => {
+    if (a === 'Unsorted') return 1;
+    if (b === 'Unsorted') return -1;
+    return a.localeCompare(b);
+  });
+
   let html = '';
-  Object.keys(groups).forEach(album => {
+  groupNames.forEach(album => {
     const labelClickable = album !== 'Unsorted';
     html += labelClickable
       ? `<div class="album-group"><button type="button" class="album-label" data-album="${escAttr(album)}" onclick="showAlbumDetail(this.dataset.album)">${esc(album)}</button>`
@@ -1689,17 +1716,25 @@ function renderAlbumFilters() {
   catalog.forEach(s => { const a = (s.album || '').trim(); if (a) albums.add(a); else hasUnsorted = true; });
   const sorted = Array.from(albums).sort((a, b) => a.localeCompare(b));
   if (hasUnsorted) sorted.push('Unsorted');
-  let html = `<button class="chip ${!currentAlbumName ? 'on' : ''}" onclick="filterByAlbum('')">All</button>`;
+  // Highlight follows filterAlbum — the thing that actually filters the list.
+  let html = `<button class="chip ${!filterAlbum ? 'on' : ''}" onclick="filterByAlbum('')">All</button>`;
   sorted.forEach(a => {
-    html += `<button class="chip ${currentAlbumName === a ? 'on' : ''}" data-album="${escAttr(a)}" onclick="filterByAlbum(this.dataset.album)">${esc(a)}</button>`;
+    html += `<button class="chip ${filterAlbum === a ? 'on' : ''}" data-album="${escAttr(a)}" onclick="filterByAlbum(this.dataset.album)">${esc(a)}</button>`;
   });
   el.innerHTML = html;
 }
 
 function filterByAlbum(album) {
+  if (!confirmDiscard()) return;
   if (!album || album === 'Unsorted') {
-    filterAlbum = album === 'Unsorted' ? album : '';
-    if (currentAlbumName) { currentAlbumName = null; showHome(); }
+    filterAlbum = album === 'Unsorted' ? 'Unsorted' : '';
+    // Only leave the page if we were on the album it belonged to.
+    if (currentAlbumName) {
+      currentAlbumName = null;
+      currentId = null;
+      pushView({ view: 'home' });
+      showHome();
+    }
     renderSidebar();
     return;
   }
@@ -1707,7 +1742,7 @@ function filterByAlbum(album) {
 }
 
 function selectSong(id) {
-  if (isEditing) { if (!confirm('Discard unsaved changes?')) return; isEditing = false; editBuffer = null; }
+  if (!confirmDiscard()) return;
   currentId = id;
   pushView({ view: 'song', id });
   showDetail();
@@ -1781,9 +1816,10 @@ function showHome() {
 }
 
 function goHome() {
-  if (isEditing) { if (!confirm('Discard unsaved changes?')) return; isEditing = false; editBuffer = null; }
+  if (!confirmDiscard()) return;
   currentId = null;
   currentAlbumName = null;
+  filterAlbum = '';
   pushView({ view: 'home' });
   showHome();
   renderSidebar();
@@ -1814,10 +1850,12 @@ function formatSecToDuration(sec) {
 }
 
 function showAlbumDetail(name) {
-  if (isEditing) { if (!confirm('Discard unsaved changes?')) return; isEditing = false; editBuffer = null; }
-  isEditingAlbum = false; albumEditBuffer = null;
+  if (!confirmDiscard()) return;
   currentAlbumName = name;
   currentId = null;
+  // Opening an album also scopes the sidebar to it, so the highlighted
+  // chip and the visible song list always agree.
+  filterAlbum = name;
   pushView({ view: 'album', name });
   renderAlbumPage(name);
   renderSidebar();
@@ -1842,10 +1880,10 @@ function renderAlbumPage(name) {
     : '';
 
   const tracklistHtml = tracks.length ? tracks.map((t, i) => `
-    <div class="track-row" onclick="selectSong('${t.id}')">
+    <div class="track-row" onclick="selectSong('${jsAttr(t.id)}')">
       <div class="track-reorder" onclick="event.stopPropagation()">
-        <button ${i === 0 ? 'style="visibility:hidden;"' : `onclick="moveTrackUp('${t.id}')"`}>▲</button>
-        <button ${i === tracks.length - 1 ? 'style="visibility:hidden;"' : `onclick="moveTrackDown('${t.id}')"`}>▼</button>
+        <button ${i === 0 ? 'style="visibility:hidden;"' : `onclick="moveTrackUp('${jsAttr(t.id)}')"`}>▲</button>
+        <button ${i === tracks.length - 1 ? 'style="visibility:hidden;"' : `onclick="moveTrackDown('${jsAttr(t.id)}')"`}>▼</button>
       </div>
       <span class="song-num">${String(i + 1).padStart(2, '0')}</span>
       <div class="track-meta">
@@ -1853,7 +1891,7 @@ function renderAlbumPage(name) {
         <div class="track-sub">${t.duration ? esc(t.duration) + ' · ' : ''}${esc(pipelineLabel(t.pipelineStatus))}</div>
       </div>
       <span class="badge pipeline-${t.pipelineStatus || 'idea'}">${esc(pipelineLabel(t.pipelineStatus))}</span>
-      <button class="perf-btn" style="flex-shrink:0;" onclick="event.stopPropagation(); openPerfViewFor('${t.id}')" title="Performance view">♪</button>
+      <button class="perf-btn" style="flex-shrink:0;" onclick="event.stopPropagation(); openPerfViewFor('${jsAttr(t.id)}')" title="Performance view">♪</button>
     </div>`).join('') : `<div style="color:var(--text-faint);font-size:13.5px;padding:20px 0;">No songs in this album yet.</div>`;
 
   document.getElementById('detail').innerHTML = `
@@ -1898,11 +1936,7 @@ function renderAlbumPage(name) {
   </div>`;
 }
 
-function newSongInAlbum(name) {
-  newSong();
-  editBuffer.album = name;
-  showEditForm(editBuffer);
-}
+function newSongInAlbum(name) { newSong(name); }
 
 function moveTrack(id, dir) {
   const tracks = catalog.filter(s => (s.album || 'Unsorted') === currentAlbumName)
@@ -1923,6 +1957,7 @@ function moveTrackDown(id) { moveTrack(id, 1); }
 
 function editAlbum(name) {
   const meta = getAlbumMeta(name) || {};
+  pendingAlbumCover = null;
   albumEditBuffer = {
     name,
     createdAt: meta.createdAt || Date.now(),
@@ -2023,7 +2058,9 @@ async function saveAlbum() {
   try {
     a.referenceSheetUrl = normalizeHttpsUrl(val('fa_refsheet'), 'Reference sheet URL');
   } catch (e) { showToast(e.message, 'error'); return; }
-  a.vocalistMasterPct = parseFloat(val('fa_masterpct')) || 0;
+  // Blank means "use the documented 15% default", not 0%.
+  const albumMaster = parseFloat(val('fa_masterpct'));
+  a.vocalistMasterPct = Number.isFinite(albumMaster) ? albumMaster : 15;
   a.cdBabyStatus = document.getElementById('fa_cdbaby').dataset.value || 'not-sent';
   if (pendingAlbumCover !== null) { a.cover = pendingAlbumCover ? await compressImage(pendingAlbumCover) : ''; pendingAlbumCover = null; }
   try {
@@ -2083,6 +2120,8 @@ function openPerfViewFor(id) {
 function openPerfView() {
   const s = catalog.find(x => x.id === currentId);
   if (!s) return;
+  isEditingPerf = false;
+  perfEditEntries = null;
   pushView({ view: 'perf', id: currentId });
   const sheet = (s.perfSheet && s.perfSheet.trim()) ? s.perfSheet : (s.lyrics || '');
   const sections = parsePerfSheet(sheet);
@@ -2153,6 +2192,9 @@ function editPerfSheet(fromLyrics) {
   const s = catalog.find(x => x.id === currentId);
   if (!s) return;
   const sheet = fromLyrics ? (s.lyrics || '') : ((s.perfSheet && s.perfSheet.trim()) ? s.perfSheet : (s.lyrics || ''));
+  // Same protection the song and album editors get: unsaved notes must not
+  // be wiped by a back gesture or an incoming Firestore snapshot.
+  isEditingPerf = true;
   perfEditEntries = buildPerfEntries(sheet);
   const lyricsCol = perfEditEntries.map(e => e.type === 'gap' ? '' : e.type === 'section' ? `[${e.label}]` : e.text).join('\n');
   const notesCol = perfEditEntries.map(e => e.type === 'gap' ? '' : e.type === 'section' ? (e.hint || '') : (e.note || '')).join('\n');
@@ -2204,6 +2246,7 @@ async function savePerfSheet() {
     s.perfSheet = out.join('\n');
     const { id, ...data } = s;
     await writeToFirestore(id, data);
+    isEditingPerf = false;
     showToast('Saved ✓', 'success');
     openPerfView();
   } catch(e) { showToast('Save failed: ' + (e.code || e.message || 'check connection'), 'error'); }
@@ -2218,7 +2261,11 @@ function renderCredits(s) {
 
 function renderLyricsHistory(s) {
   if (!s.lyricsHistory || !s.lyricsHistory.length) return '';
-  const items = [...s.lyricsHistory].reverse().map(h => `<div class="text-block mono" style="font-size:12px;margin-bottom:10px;"><div style="color:var(--text-faint);margin-bottom:4px;">${new Date(h.timestamp).toLocaleString()}</div>${esc(h.text).slice(0, 300)}${h.text.length > 300 ? '\u2026' : ''}</div>`).join('');
+  // Slice first, then escape \u2014 slicing escaped text can cut an entity in half.
+  const items = [...s.lyricsHistory].reverse().map(h => {
+    const raw = String(h.text || '');
+    return `<div class="text-block mono" style="font-size:12px;margin-bottom:10px;"><div style="color:var(--text-faint);margin-bottom:4px;">${esc(new Date(h.timestamp).toLocaleString())}</div>${esc(raw.slice(0, 300))}${raw.length > 300 ? '\u2026' : ''}</div>`;
+  }).join('');
   return `<div class="section"><div class="section-label">Lyrics history (${s.lyricsHistory.length})</div>${items}</div>`;
 }
 
@@ -2227,7 +2274,7 @@ function showDetail() {
   const s = catalog.find(x => x.id === currentId);
   if (!s) { showHome(); return; }
   const d = document.getElementById('detail');
-  const statusLabel = { draft:'Draft', production:'In production', final:'Final' }[s.status] || 'Draft';
+  const songStatusLabel = statusLabel(s.status);
   const masterPct = (s.vocalistMasterPct !== '' && s.vocalistMasterPct != null) ? s.vocalistMasterPct : null;
   const albumMasterPct = s.album ? getAlbumMeta(s.album)?.vocalistMasterPct : null;
 
@@ -2246,7 +2293,7 @@ function showDetail() {
     </div>
     <div class="badges">
       ${s.vocal ? `<span class="badge vocal">${esc(s.vocal)}</span>` : ''}
-      <span class="badge status-${s.status||'draft'}">${statusLabel}</span>
+      <span class="badge status-${s.status||'draft'}">${songStatusLabel}</span>
       <span class="badge pipeline-${s.pipelineStatus || 'idea'}">${esc(pipelineLabel(s.pipelineStatus))}</span>
       ${s.album ? `<span class="badge">${esc(s.album)}</span>` : ''}
       <span class="badge sokoj-${s.sokojStatus === 'filed' ? 'filed' : 'not-filed'}">SOKOJ: ${s.sokojStatus === 'filed' ? 'Filed' : 'Not filed'}</span>
@@ -2335,6 +2382,7 @@ function printLyrics() {
   const s = catalog.find(x => x.id === currentId);
   if (!s || !s.lyrics) return;
   const w = window.open('', '_blank');
+  if (!w) { showToast('Allow pop-ups to print lyrics', 'error'); return; }
   const safeTitle = esc(s.title || 'Untitled');
   const safeLyrics = esc(s.lyrics);
   w.document.write(`<!DOCTYPE html><html><head><title>${safeTitle}</title>
@@ -2360,9 +2408,10 @@ function printLyrics() {
 function mp3Placeholder() { showToast('MP3 upload coming in the cloud version', 'success'); }
 
 // ── EDIT FORM ──────────────────────────────────────────────────────
-function newSong() {
-  if (isEditing) { if (!confirm('Discard unsaved changes?')) return; }
-  editBuffer = { id: uid(), title:'', vocal:'Intimate female', status:'draft', pipelineStatus:'idea', album:'', bpm:'', key:'', duration:'', genre:'', lyrics:'', suno:'', sunoNegative:'', production:'', instruments:'', chords:'', analysis:'', cover:'', spotify:'', apple:'', youtube:'', soundcloud:'', deezer:'', audioName:'', credits:[], sokojStatus:'not-filed', vocalistMasterPct:'', crossCatalogEcho:'', lyricsHistory:[], trackNumber: null, perfSheet:'', createdAt: Date.now() };
+function newSong(album) {
+  if (!confirmDiscard()) return;
+  pendingCover = null;
+  editBuffer = { id: uid(), title:'', vocal:'Intimate female', status:'draft', pipelineStatus:'idea', album: album || '', bpm:'', key:'', duration:'', genre:'', lyrics:'', suno:'', sunoNegative:'', production:'', instruments:'', chords:'', analysis:'', cover:'', spotify:'', apple:'', youtube:'', soundcloud:'', deezer:'', audioName:'', credits:[], sokojStatus:'not-filed', vocalistMasterPct:'', crossCatalogEcho:'', lyricsHistory:[], trackNumber: null, perfSheet:'', createdAt: Date.now() };
   currentId = editBuffer.id;
   isEditing = true;
   showEditForm(editBuffer);
@@ -2373,6 +2422,7 @@ function newSong() {
 function editSong() {
   const s = catalog.find(x => x.id === currentId);
   if (!s) return;
+  pendingCover = null;
   editBuffer = { ...s, _prevLyrics: s.lyrics || '' };
   isEditing = true;
   showEditForm(editBuffer);
@@ -2527,7 +2577,9 @@ async function saveSong() {
     if (!confirm(`These lyrics already exist in the catalog as "${dup.title || 'Untitled'}". Save anyway?`)) return;
   }
   if (editBuffer._prevLyrics !== undefined && editBuffer._prevLyrics !== editBuffer.lyrics && editBuffer._prevLyrics.trim()) {
-    editBuffer.lyricsHistory = [...(editBuffer.lyricsHistory || []), { text: editBuffer._prevLyrics, timestamp: Date.now() }];
+    // Capped: a Firestore document is limited to 1 MiB and unbounded history
+    // would eventually make the song unsaveable.
+    editBuffer.lyricsHistory = [...(editBuffer.lyricsHistory || []), { text: editBuffer._prevLyrics, timestamp: Date.now() }].slice(-LYRICS_HISTORY_MAX);
   }
   delete editBuffer._prevLyrics;
   editBuffer.updatedAt = Date.now();
@@ -2572,9 +2624,12 @@ function closeImport() { document.getElementById('importModal').classList.remove
 async function doImport() {
   const txt = document.getElementById('importText').value.trim();
   if (!txt) return;
+
+  // Parsing the backup and writing it are separate failures and deserve
+  // separate messages — a Firestore error is not a malformed backup.
+  let data, importedAlbums;
   try {
     const parsed = JSON.parse(txt);
-    let data, importedAlbums;
     if (Array.isArray(parsed)) {
       data = parsed;
       importedAlbums = [];
@@ -2584,6 +2639,13 @@ async function doImport() {
     } else {
       throw new Error('Unsupported backup format');
     }
+  } catch (e) {
+    showToast('Import failed — the text is not a valid catalog backup', 'error');
+    return;
+  }
+
+  let written = 0;
+  try {
 
     // Duplicate check: compare each imported song's lyrics against the
     // EXISTING catalog (a song updating itself by matching id is not a duplicate).
@@ -2607,7 +2669,7 @@ async function doImport() {
         soundcloud:safeExternalUrl(s.soundcloud), deezer:safeExternalUrl(s.deezer), audioName:s.audioName||'',
         credits:s.credits||[], sokojStatus:s.sokojStatus||'not-filed',
         vocalistMasterPct:s.vocalistMasterPct!=null?s.vocalistMasterPct:'', crossCatalogEcho:s.crossCatalogEcho||'',
-        lyricsHistory:s.lyricsHistory||[], trackNumber:s.trackNumber!=null?s.trackNumber:null,
+        lyricsHistory:(s.lyricsHistory||[]).slice(-LYRICS_HISTORY_MAX), trackNumber:s.trackNumber!=null?s.trackNumber:null,
         perfSheet:s.perfSheet||'',
         createdAt:s.createdAt||Date.now(), updatedAt:Date.now()
       }};
@@ -2616,15 +2678,27 @@ async function doImport() {
       .filter(a => a && String(a.name || '').trim())
       .map(({ id, ...album }) => ({ ...album, name: String(album.name).trim(), referenceSheetUrl: safeExternalUrl(album.referenceSheetUrl) }));
 
+    // Oversized covers are shrunk here \u2014 an uncompressed one can push the
+    // song past Firestore's 1 MiB document limit and fail the whole import.
+    for (const { clean } of preparedSongs) {
+      if (typeof clean.cover === 'string' && clean.cover.length > COVER_RECOMPRESS_OVER) {
+        clean.cover = await compressImage(clean.cover);
+      }
+    }
+
     // Merge: add new songs, update existing ones by id. Nothing already
     // in the catalog is ever deleted by an import.
     showToast(`Adding ${preparedSongs.length} song${preparedSongs.length!==1?'s':''}\u2026`, 'success');
-    for (const { id, clean } of preparedSongs) await writeToFirestore(id, clean);
+    for (const { id, clean } of preparedSongs) { await writeToFirestore(id, clean); written++; }
     for (const album of preparedAlbums) await writeAlbumToFirestore(album.name, album);
 
     closeImport();
     showToast(`Added ${preparedSongs.length} song${preparedSongs.length!==1?'s':''} \u2713`, 'success');
-  } catch(e) { showToast('Import failed \u2014 check the backup format and connection', 'error'); }
+  } catch(e) {
+    // An import is written song by song, so say how far it got.
+    const where = written ? ` after ${written} song${written!==1?'s':''}` : '';
+    showToast(`Import failed${where}: ` + (e.code || e.message || 'check connection'), 'error');
+  }
 }
 
 function openExport() {
@@ -2670,7 +2744,10 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     if (document.getElementById('importModal').classList.contains('visible')) { closeImport(); return; }
     if (document.getElementById('exportModal').classList.contains('visible')) { closeExport(); return; }
+    if (isEditingAlbum) { cancelAlbumEdit(); return; }
     if (isEditing) { cancelEdit(); return; }
+    if (perfIsOpen()) { goBack(); return; }
+    if (document.body.classList.contains('menu-open')) { closeMenu(); return; }
   }
   if ((e.metaKey||e.ctrlKey) && e.key==='s' && isEditing) { e.preventDefault(); saveSong(); }
   if ((e.metaKey||e.ctrlKey) && e.key==='n' && !isEditing) { e.preventDefault(); newSong(); }
@@ -2691,6 +2768,22 @@ async function checkPass() {
     document.getElementById('gateInput').value = '';
     setTimeout(() => { err.textContent = ''; }, 2500);
   }
+}
+
+async function signOutNow() {
+  if (!confirmDiscard()) return;
+  try {
+    // Detach before signing out, or the listeners fire permission-denied
+    // on the way down.
+    stopFirestore();
+    await signOut(auth);
+    catalog = []; albumsData = [];
+    currentId = null; currentAlbumName = null; filterAlbum = '';
+    closePerfView();
+    closeMenu();
+    showHome();
+    renderSidebar();
+  } catch (e) { showToast('Sign out failed: ' + (e.code || e.message), 'error'); }
 }
 
 // ── SEGMENTED CONTROL ──────────────────────────────────────────────
@@ -2755,6 +2848,7 @@ window.printLyrics = printLyrics;
 window.mp3Placeholder = mp3Placeholder;
 window.generateAnalysis = generateAnalysis;
 window.checkPass = checkPass;
+window.signOutNow = signOutNow;
 window.toggleTheme = toggleTheme;
 window.toggleRail = toggleRail;
 window.handleCoverUpload = handleCoverUpload;
@@ -2785,8 +2879,8 @@ window.loadPerfFromLyrics = loadPerfFromLyrics;
 function perfIsOpen() { return document.getElementById('perfOverlay').classList.contains('visible'); }
 
 function canGoBack() {
+  if (isEditing || isEditingAlbum || isEditingPerf) return false;
   if (perfIsOpen()) return true;
-  if (isEditing || isEditingAlbum) return false;
   return !!(currentId || currentAlbumName);
 }
 
@@ -2848,11 +2942,7 @@ function applyView(state) {
 }
 
 window.addEventListener('popstate', e => {
-  if (isEditing || isEditingAlbum) {
-    if (!confirm('Discard unsaved changes?')) { history.pushState(currentViewState(), ''); return; }
-    isEditing = false; editBuffer = null;
-    isEditingAlbum = false; albumEditBuffer = null;
-  }
+  if (!confirmDiscard()) { history.pushState(currentViewState(), ''); return; }
   applyView(e.state || { view: 'home' });
 });
 
@@ -2877,7 +2967,7 @@ function swipeReset(animate) {
 if (isStandalone()) {
   document.addEventListener('touchstart', e => {
     if (e.touches.length !== 1) return;
-    if (isEditing || isEditingAlbum) return;
+    if (isEditing || isEditingAlbum || isEditingPerf) return;
     if (document.body.classList.contains('menu-open')) return;
     const t = e.touches[0];
     if (t.clientX > SWIPE_EDGE) return;
@@ -2921,12 +3011,13 @@ history.replaceState({ view: 'home' }, '');
 applyTheme();
 applyRail();
 showHome();
-let fsStarted = false;
 onAuthStateChanged(auth, user => {
   if (user) {
     document.getElementById('gate').classList.remove('visible');
     if (!fsStarted) { fsStarted = true; initFirestore(); }
   } else {
+    // Covers an expired session as well as an explicit sign-out.
+    stopFirestore();
     document.getElementById('gate').classList.add('visible');
   }
 });
