@@ -138,6 +138,9 @@ let editBuffer = null;
 let albumEditBuffer = null;
 let isEditingAlbum = false;
 let isEditingPerf = false;
+// Open/closed state of the detail view's collapsible sections. Shared across
+// every song for the life of this session -- not saved per-song.
+let detailSectionsOpen = { rights: false, analysis: false, links: false };
 
 // Single guard for every "you have unsaved work" exit path. Returns false
 // when the user chooses to stay; clears all edit state when they discard.
@@ -463,6 +466,22 @@ const PIPELINE_STAGES = [
   { key:'distributed', label:'Distributed' }
 ];
 function pipelineLabel(key) { return (PIPELINE_STAGES.find(p => p.key === key) || PIPELINE_STAGES[0]).label; }
+
+// ── DETAIL VIEW: COLLAPSIBLE SECTIONS ────────────────────────────────
+function toggleDetailSection(key) {
+  detailSectionsOpen[key] = !detailSectionsOpen[key];
+  showDetail();
+}
+function detailCollapsible(key, title, bodyHtml) {
+  const open = !!detailSectionsOpen[key];
+  return `<div class="detail-collapsible ${open ? 'open' : ''}">
+    <button type="button" class="detail-collapsible-toggle" onclick="toggleDetailSection('${key}')">
+      <span>${esc(title)}</span>
+      <span class="chev" aria-hidden="true">&#8250;</span>
+    </button>
+    ${open ? `<div class="detail-collapsible-body">${bodyHtml}</div>` : ''}
+  </div>`;
+}
 
 function parseDurationToSec(str) {
   if (!str) return null;
@@ -905,13 +924,50 @@ function showDetail() {
   const masterPct = (s.vocalistMasterPct !== '' && s.vocalistMasterPct != null) ? s.vocalistMasterPct : null;
   const albumMasterPct = s.album ? getAlbumMeta(s.album)?.vocalistMasterPct : null;
 
+  // ── Rights & credits ──
+  const rightsBody = `
+    <div class="section">
+      <div class="section-label">SOKOJ</div>
+      <div class="text-block">${s.sokojStatus === 'filed' ? 'Filed' : 'Not filed'}</div>
+    </div>
+    <div class="section">
+      <div class="section-label">Vocalist master</div>
+      <div class="text-block">${masterPct != null ? masterPct + '%' : (albumMasterPct != null ? albumMasterPct + '% (album default)' : '15% (default)')} \u2014 no publishing claim</div>
+    </div>
+    ${renderCredits(s)}`;
+
+  // ── Analysis & chords ──
+  const analysisBody = `
+    ${s.chords ? `<div class="section"><div class="section-label">Chord track</div><div class="text-block mono">${esc(s.chords)}</div></div>` : ''}
+    ${s.instruments ? `<div class="section"><div class="section-label">Instruments / Arrangement</div><div class="text-block">${esc(s.instruments)}</div></div>` : ''}
+    ${s.production ? `<div class="section"><div class="section-label">Production notes</div><div class="text-block">${esc(s.production)}</div></div>` : ''}
+    <div class="section">
+      <div class="analysis-head">
+        <div class="section-label">AI Analysis</div>
+        <button class="ai-btn" onclick="generateAnalysis()">\u2736 Generate analysis</button>
+      </div>
+      ${s.analysis ? `<div class="text-block">${esc(s.analysis)}</div>` : `<div class="text-block" style="color:var(--text-faint);font-style:italic;">No analysis yet. Generate one, or add it by editing the song.</div>`}
+    </div>`;
+
+  // ── Links & history ──
+  const streamLinksHtml = renderStreamLinks(s);
+  const lyricsHistoryHtml = renderLyricsHistory(s);
+  const hasLinksHistory = streamLinksHtml || s.crossCatalogEcho || lyricsHistoryHtml;
+  const linksBody = `
+    ${streamLinksHtml}
+    ${s.crossCatalogEcho ? `<div class="section"><div class="section-label">Cross-catalog echo</div><div class="text-block">${esc(s.crossCatalogEcho)}</div></div>` : ''}
+    ${lyricsHistoryHtml}`;
+
   d.innerHTML = `
-  <div class="detail-inner">
+  <div class="detail-inner song-detail">
     ${s.album
       ? `<button class="back-btn" onclick="showAlbumDetail('${jsAttr(s.album)}')">&#8249; ${esc(s.album)}</button>`
       : `<button class="back-btn" onclick="goHome()">&#8249; Home</button>`}
     <div class="detail-head">
-      <h1 class="detail-title">${esc(s.title || 'Untitled')}</h1>
+      <div>
+        ${s.trackNumber ? `<div class="detail-track-num">Track ${esc(s.trackNumber)}${s.album ? ' \u00b7 ' + esc(s.album) : ''}</div>` : (s.album ? `<div class="detail-track-num">${esc(s.album)}</div>` : '')}
+        <h1 class="detail-title">${esc(s.title || 'Untitled')}</h1>
+      </div>
       <div class="detail-actions">
         <button class="icon-btn" onclick="openPerfView()">♪ Perform</button>
         <button class="icon-btn" onclick="editSong()">Edit</button>
@@ -922,53 +978,42 @@ function showDetail() {
       ${s.vocal ? `<span class="badge vocal">${esc(s.vocal)}</span>` : ''}
       <span class="badge status-${s.status||'draft'}">${songStatusLabel}</span>
       <span class="badge pipeline-${s.pipelineStatus || 'idea'}">${esc(pipelineLabel(s.pipelineStatus))}</span>
-      ${s.album ? `<span class="badge">${esc(s.album)}</span>` : ''}
-      <span class="badge sokoj-${s.sokojStatus === 'filed' ? 'filed' : 'not-filed'}">SOKOJ: ${s.sokojStatus === 'filed' ? 'Filed' : 'Not filed'}</span>
     </div>
     ${s.cover ? `<div class="cover-block"><img class="cover-img" src="${s.cover}" alt="cover"></div>` : ''}
-    <div class="specs">
-      <div class="spec"><div class="k">BPM</div><div class="v">${esc(s.bpm) || '\u2014'}</div></div>
-      <div class="spec"><div class="k">Key</div><div class="v">${esc(s.key) || '\u2014'}</div></div>
-      <div class="spec"><div class="k">Duration</div><div class="v">${esc(s.duration) || '\u2014'}</div></div>
-      <div class="spec"><div class="k">Genre</div><div class="v" style="font-family:var(--sans);font-size: var(--t-caption);">${esc(s.genre) || '\u2014'}</div></div>
-    </div>
-    <div class="section">
-      <div class="section-label">Vocalist master</div>
-      <div class="text-block">${masterPct != null ? masterPct + '%' : (albumMasterPct != null ? albumMasterPct + '% (album default)' : '15% (default)')} \u2014 no publishing claim</div>
-    </div>
-    ${renderStreamLinks(s)}
-    ${s.lyrics ? `<div class="section">
-      <div class="lyric-head">
-        <div class="section-label">Lyrics</div>
-        <div class="lyric-actions">
-          <button class="mini-btn" onclick="copyLyrics()">Copy lyrics</button>
-          <button class="mini-btn" onclick="printLyrics()">Print lyrics</button>
+    <div class="song-grid">
+      <div class="song-grid-main">
+        <div class="specs">
+          <div class="spec"><div class="k">BPM</div><div class="v">${esc(s.bpm) || '\u2014'}</div></div>
+          <div class="spec"><div class="k">Key</div><div class="v">${esc(s.key) || '\u2014'}</div></div>
+          <div class="spec"><div class="k">Duration</div><div class="v">${esc(s.duration) || '\u2014'}</div></div>
+          <div class="spec"><div class="k">Genre</div><div class="v" style="font-family:var(--sans);font-size: var(--t-caption);">${esc(s.genre) || '\u2014'}</div></div>
         </div>
+        ${s.lyrics ? `<div class="section">
+          <div class="lyric-head">
+            <div class="section-label">Lyrics</div>
+            <div class="lyric-actions">
+              <button class="mini-btn" onclick="copyLyrics()">Copy lyrics</button>
+              <button class="mini-btn" onclick="printLyrics()">Print lyrics</button>
+            </div>
+          </div>
+          <div class="lyrics">${formatLyrics(s.lyrics)}</div>
+        </div>` : ''}
       </div>
-      <div class="lyrics">${formatLyrics(s.lyrics)}</div>
-    </div>` : ''}
-    <div class="audio-block">
-      <div class="section-label">Audio (MP3)</div>
-      <div class="audio-placeholder">
-        <span>${s.audioName ? esc(s.audioName) : 'MP3 upload \u2014 coming in cloud version.'}</span>
-        <button onclick="mp3Placeholder()">Upload MP3</button>
+      <div class="song-grid-side">
+        ${s.suno ? `<div class="section"><div class="section-label">Suno style prompt</div><div class="text-block mono suno-block"><button class="copy-btn" onclick="copySuno()">Copy</button>${esc(s.suno)}</div></div>` : ''}
+        ${s.sunoNegative ? `<div class="section"><div class="section-label">Suno negative prompt</div><div class="text-block mono">${esc(s.sunoNegative)}</div></div>` : ''}
+        <div class="audio-block">
+          <div class="section-label">Audio (MP3)</div>
+          <div class="audio-placeholder">
+            <span>${s.audioName ? esc(s.audioName) : 'MP3 upload \u2014 coming in cloud version.'}</span>
+            <button onclick="mp3Placeholder()">Upload MP3</button>
+          </div>
+        </div>
+        ${detailCollapsible('rights', 'Rights & credits', rightsBody)}
+        ${detailCollapsible('analysis', 'Analysis & chords', analysisBody)}
+        ${hasLinksHistory ? detailCollapsible('links', 'Links & history', linksBody) : ''}
       </div>
     </div>
-    ${s.chords ? `<div class="section"><div class="section-label">Chord track</div><div class="text-block mono">${esc(s.chords)}</div></div>` : ''}
-    ${s.instruments ? `<div class="section"><div class="section-label">Instruments / Arrangement</div><div class="text-block">${esc(s.instruments)}</div></div>` : ''}
-    ${s.suno ? `<div class="section"><div class="section-label">Suno style prompt</div><div class="text-block mono suno-block"><button class="copy-btn" onclick="copySuno()">Copy</button>${esc(s.suno)}</div></div>` : ''}
-    ${s.sunoNegative ? `<div class="section"><div class="section-label">Suno negative prompt</div><div class="text-block mono">${esc(s.sunoNegative)}</div></div>` : ''}
-    ${s.production ? `<div class="section"><div class="section-label">Production notes</div><div class="text-block">${esc(s.production)}</div></div>` : ''}
-    ${renderCredits(s)}
-    ${s.crossCatalogEcho ? `<div class="section"><div class="section-label">Cross-catalog echo</div><div class="text-block">${esc(s.crossCatalogEcho)}</div></div>` : ''}
-    <div class="section">
-      <div class="analysis-head">
-        <div class="section-label">AI Analysis</div>
-        <button class="ai-btn" onclick="generateAnalysis()">\u2736 Generate analysis</button>
-      </div>
-      ${s.analysis ? `<div class="text-block">${esc(s.analysis)}</div>` : `<div class="text-block" style="color:var(--text-faint);font-style:italic;">No analysis yet. Generate one, or add it by editing the song.</div>`}
-    </div>
-    ${renderLyricsHistory(s)}
   </div>`;
 }
 
@@ -1479,6 +1524,7 @@ function toggleTheme() {
 // ── EXPOSE TO WINDOW (module scope requires this for onclick handlers) ──
 window.renderSidebar = renderSidebar;
 window.quickFilter = quickFilter;
+window.toggleDetailSection = toggleDetailSection;
 window.filterByAlbum = filterByAlbum;
 window.selectSong = selectSong;
 window.newSong = newSong;
