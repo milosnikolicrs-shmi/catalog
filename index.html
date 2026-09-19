@@ -51,18 +51,13 @@
     <div class="search-wrap">
       <input id="search" type="text" placeholder="Search titles, lyrics, themes…" oninput="renderSidebar()">
     </div>
-    <div class="filters">
-      <div class="seg" id="filterVocal" data-value="">
-        <button class="on" onclick="seg(this,'')">All</button>
-        <button onclick="seg(this,'Intimate female')">Female</button>
-        <button onclick="seg(this,'Male')">Male</button>
-      </div>
-      <div class="seg" id="filterStatus" data-value="">
-        <button class="on" onclick="seg(this,'')">All</button>
-        <button onclick="seg(this,'draft')">Draft</button>
-        <button onclick="seg(this,'production')">Prod</button>
-        <button onclick="seg(this,'final')">Final</button>
-      </div>
+    <div class="chip-row quick-filters" id="quickFilters">
+      <button class="chip on" data-kind="all" onclick="quickFilter('all','')">All</button>
+      <button class="chip" data-kind="status" data-value="final" onclick="quickFilter('status','final')">Final</button>
+      <button class="chip" data-kind="status" data-value="production" onclick="quickFilter('status','production')">Prod</button>
+      <button class="chip" data-kind="status" data-value="draft" onclick="quickFilter('status','draft')">Draft</button>
+      <button class="chip" data-kind="vocal" data-value="Intimate female" onclick="quickFilter('vocal','Intimate female')">Female</button>
+      <button class="chip" data-kind="vocal" data-value="Male" onclick="quickFilter('vocal','Male')">Male</button>
     </div>
     <div class="chip-row" id="albumFilters"></div>
     <div class="song-list" id="songList"></div>
@@ -136,6 +131,8 @@ let albumsData = [];
 let currentId = null;
 let currentAlbumName = null;
 let filterAlbum = '';
+let filterVocal = '';
+let filterStatus = '';
 let isEditing = false;
 let editBuffer = null;
 let albumEditBuffer = null;
@@ -281,8 +278,8 @@ function songThumb(s) {
 function renderSidebar() {
   const list = document.getElementById('songList');
   const q = document.getElementById('search').value.toLowerCase().trim();
-  const fv = document.getElementById('filterVocal').dataset.value || '';
-  const fs = document.getElementById('filterStatus').dataset.value || '';
+  const fv = filterVocal;
+  const fs = filterStatus;
 
   renderAlbumFilters();
 
@@ -325,14 +322,13 @@ function renderSidebar() {
     groups[album].forEach(s => {
       const idx = catalog.indexOf(s) + 1;
       const num = String(idx).padStart(2, '0');
-      html += `<button type="button" class="song-item ${s.id === currentId ? 'active' : ''}" onclick="selectSong('${jsAttr(s.id)}')">
+      html += `<button type="button" class="song-item status-${s.status || 'draft'} ${s.id === currentId ? 'active' : ''}" onclick="selectSong('${jsAttr(s.id)}')">
         <span class="song-num">${num}</span>
         ${songThumb(s)}
         <div class="song-meta">
           <div class="song-title-s">${esc(s.title || 'Untitled')}</div>
           <div class="song-sub-s">${esc(s.genre || '\u2014')}${s.key ? ' \u00b7 ' + esc(s.key) : ''}${s.bpm ? ' \u00b7 ' + esc(s.bpm) + ' BPM' : ''}</div>
         </div>
-        ${statusCapsule(s.status)}
       </button>`;
     });
     html += `</div>`;
@@ -1422,7 +1418,29 @@ function seg(btn, v) {
   const c = btn.parentElement;
   c.dataset.value = v;
   [...c.querySelectorAll('button')].forEach(b => b.classList.toggle('on', b === btn));
-  if (c.id === 'filterVocal' || c.id === 'filterStatus') renderSidebar();
+}
+
+// ── SIDEBAR QUICK FILTERS (status + vocal, merged into one chip row) ─
+function quickFilter(kind, value) {
+  if (kind === 'all') { filterVocal = ''; filterStatus = ''; }
+  else if (kind === 'status') { filterStatus = (filterStatus === value) ? '' : value; }
+  else if (kind === 'vocal') { filterVocal = (filterVocal === value) ? '' : value; }
+  renderQuickFilters();
+  renderSidebar();
+}
+
+function renderQuickFilters() {
+  const el = document.getElementById('quickFilters');
+  if (!el) return;
+  el.querySelectorAll('.chip').forEach(btn => {
+    const kind = btn.dataset.kind;
+    const active = kind === 'all'
+      ? (!filterVocal && !filterStatus)
+      : kind === 'status'
+        ? filterStatus === btn.dataset.value
+        : filterVocal === btn.dataset.value;
+    btn.classList.toggle('on', active);
+  });
 }
 
 // ── MOBILE MENU ────────────────────────────────────────────────────
@@ -1460,6 +1478,7 @@ function toggleTheme() {
 
 // ── EXPOSE TO WINDOW (module scope requires this for onclick handlers) ──
 window.renderSidebar = renderSidebar;
+window.quickFilter = quickFilter;
 window.filterByAlbum = filterByAlbum;
 window.selectSong = selectSong;
 window.newSong = newSong;

@@ -239,7 +239,6 @@
   body.rail .brand h1,
   body.rail .brand .sub,
   body.rail .search-wrap,
-  body.rail .filters,
   body.rail .chip-row,
   body.rail .album-label,
   body.rail .song-meta,
@@ -305,12 +304,6 @@
   .search-wrap input::placeholder { color: var(--text-faint); font-size: var(--t-caption); }
 
   /* ── SEGMENTED CONTROLS ───────────────────────── */
-  .filters {
-    display: flex;
-    flex-direction: column;
-    gap: var(--s2);
-    padding: 0 var(--s3) var(--s3);
-  }
   .seg {
     display: flex;
     background: var(--bg-elev);
@@ -366,6 +359,8 @@
     box-shadow: var(--shadow-1);
   }
   body.light .chip.on { background: #fff; }
+  .quick-filters .chip.on { background: var(--gold); color: var(--bg); }
+  body.light .quick-filters .chip.on { background: var(--gold); color: var(--bg); }
 
   .badge.pipeline-idea { background: var(--bg-elev); color: var(--text-dim); }
   .badge.pipeline-draft-lyrics { background: color-mix(in srgb, #8a744a 16%, transparent); color: #b0925a; }
@@ -391,7 +386,7 @@
   .album-header .cover-img { max-width: 220px; margin-bottom: 0; }
   .album-header-info { flex: 1; min-width: 0; }
   .album-meta-row { display: flex; flex-wrap: wrap; gap: var(--s4); margin: var(--s3) 0; }
-  .album-meta-item { font-size: var(--t-caption); color: var(--text-dim); }
+  .album-meta-item { font-size: var(--t-caption); color: var(--text-dim); font-variant-numeric: tabular-nums; }
   .album-meta-item b { color: var(--text); font-weight: 600; }
 
   .track-row {
@@ -403,10 +398,10 @@
     cursor: pointer;
     transition: background 0.15s;
   }
-  .track-row .song-num { color: var(--text-faint); font-family: var(--mono); font-size: var(--t-caption); width: 22px; }
+  .track-row .song-num { color: var(--text-faint); font-family: var(--mono); font-size: var(--t-caption); width: 22px; font-variant-numeric: tabular-nums; }
   .track-row .track-meta { flex: 1; min-width: 0; }
   .track-row .track-title { font-size: var(--t-body); color: var(--text); }
-  .track-row .track-sub { font-size: var(--t-caption); color: var(--text-faint); margin-top: var(--s1); }
+  .track-row .track-sub { font-size: var(--t-caption); color: var(--text-faint); margin-top: var(--s1); font-variant-numeric: tabular-nums; }
   .track-reorder { display: flex; flex-direction: column; gap: var(--s1); }
   .track-reorder button {
     background: var(--bg-elev);
@@ -448,14 +443,14 @@
 
   .song-item {
     position: relative;
-    padding: var(--s3) var(--s3);
+    padding: var(--s3) var(--s3) var(--s3) calc(var(--s3) + 3px);
     border-radius: var(--r-md);
     cursor: pointer;
-    transition: filter var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+    transition: background var(--dur) var(--ease), transform var(--dur) var(--ease);
     display: flex;
     align-items: center;
     gap: var(--s3);
-    min-height: 48px;
+    min-height: 52px;
   }
   button.song-item, button.recent-item {
     width: 100%;
@@ -470,25 +465,29 @@
     position: absolute;
     left: 0;
     top: 50%;
-    transform: translateY(-50%) scaleY(0);
-    width: 2px;
-    height: 26px;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 30px;
     border-radius: var(--r-full);
-    background: var(--gold);
-    transition: transform var(--dur) var(--ease);
+    background: var(--draft);
+    transition: background var(--dur) var(--ease);
   }
-  .song-item:hover { filter: brightness(1.06); box-shadow: var(--shadow-1); transform: scale(1.01); }
+  .song-item.status-production::before { background: var(--gold); }
+  .song-item.status-final::before { background: var(--ok); }
+  .song-item:hover { background: var(--bg-elev); }
+  .song-item:hover .song-title-s { color: var(--text); }
   .song-item:focus-visible, .recent-item:focus-visible, .topbar-brand:focus-visible {
     outline: 2px solid var(--gold);
     outline-offset: 2px;
   }
-  .song-item.active::before { transform: translateY(-50%) scaleY(1); }
-  .song-item.active .song-title-s { color: var(--gold); }
+  .song-item.active { background: var(--bg-fill); }
+  .song-item.active .song-title-s { color: var(--text); }
   .song-num {
     font-family: var(--mono);
     font-size: var(--t-micro);
     color: var(--text-faint);
     min-width: 20px;
+    font-variant-numeric: tabular-nums;
   }
   .song-thumb {
     width: 34px;
@@ -502,19 +501,20 @@
   .song-title-s {
     font-family: var(--serif);
     font-size: var(--t-body);
-    color: var(--text);
+    color: var(--text-dim);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     transition: color var(--dur) var(--ease);
   }
   .song-sub-s {
-    font-size: var(--t-micro);
+    font-size: var(--t-caption);
     color: var(--text-faint);
     margin-top: var(--s1);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-variant-numeric: tabular-nums;
   }
 
   /* ── STATUS CAPSULES ── */
@@ -657,6 +657,12 @@
     gap: var(--s2);
     margin-bottom: var(--s6);
   }
+  /* ── CARD SURFACE ── */
+  .spec, .text-block, .audio-placeholder, .stat-card, .status-bar-wrap,
+  .recent-item, .modal {
+    border: 1px solid rgba(236, 232, 225, 0.07);
+    border-top-color: rgba(201, 168, 106, 0.16);
+  }
   .spec {
     padding: var(--s4);
     background: var(--bg-panel);
@@ -671,7 +677,7 @@
     margin-bottom: var(--s1);
     font-weight: 600;
   }
-  .spec .v { font-size: var(--t-body); color: var(--text); font-family: var(--mono); }
+  .spec .v { font-size: var(--t-body); color: var(--text); font-family: var(--mono); font-variant-numeric: tabular-nums; }
 
   .section { margin-bottom: var(--s6); }
   .section-label {
@@ -708,6 +714,7 @@
     color: var(--text-read);
     white-space: pre-wrap;
     box-shadow: var(--shadow-1);
+    font-variant-numeric: tabular-nums;
   }
   .text-block.mono { font-family: var(--mono); font-size: var(--t-caption); color: var(--text-dim); }
 
@@ -873,6 +880,7 @@
     font-size: var(--t-h2);
     font-weight: 500;
     letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
     color: var(--gold);
     line-height: 1;
     margin-bottom: var(--s2);
@@ -1313,6 +1321,7 @@
     :root { --topbar-h: calc(52px + env(safe-area-inset-top)); --clearance: 70px; }
     .app { grid-template-columns: 1fr; }
     .topbar { display: flex; }
+    .song-item { min-height: 62px; }
 
     .sidebar {
       position: fixed;
