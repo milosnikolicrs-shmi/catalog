@@ -22,7 +22,6 @@
     --mono: 'SF Mono', ui-monospace, Menlo, monospace;
     --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
     --sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
-    --topbar-h: 0px;
 
     /* ── SPACING (8pt grid) ── */
     --s1: 4px;
@@ -124,7 +123,7 @@
   .ai-btn:active, .gate-btn:active, .copy-btn:active, .seg button:active,
   .song-item:active, .recent-item:active, .stream-link:active, .back-btn:active,
   .perf-btn:active, .chip:active, .track-row:active,
-  .topbar-menu:active { transform: scale(0.965); }
+  .mobile-bar-icon:active, .song-item-action:active { transform: scale(0.965); }
 
   /* ── CONTENT CROSSFADE ── */
   @keyframes contentIn {
@@ -147,59 +146,6 @@
     filter: brightness(1.08);
     box-shadow: var(--shadow-1);
     transform: scale(1.01);
-  }
-
-  /* ── TOPBAR (mobile) ─────────────────────────── */
-  .topbar {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    height: calc(52px + env(safe-area-inset-top));
-    padding-top: env(safe-area-inset-top);
-    background: color-mix(in srgb, var(--bg) 78%, transparent);
-    backdrop-filter: blur(20px) saturate(1.6);
-    -webkit-backdrop-filter: blur(20px) saturate(1.6);
-    box-shadow: 0 1px 12px -4px rgba(0,0,0,0.35);
-    z-index: 50;
-    align-items: center;
-    padding-left: var(--s1);
-    padding-right: var(--s3);
-  }
-  .topbar-menu {
-    width: 44px; height: 44px;
-    background: none;
-    border: none;
-    color: var(--gold);
-    font-size: var(--t-lead);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--r-md);
-    transition: transform 0.12s;
-    z-index: 2;
-  }
-  .topbar-brand {
-    position: absolute;
-    left: 50%;
-    top: env(safe-area-inset-top);
-    height: 52px;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: var(--s2);
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-  }
-  .topbar-brand img { width: 26px; height: 26px; object-fit: contain; border-radius: var(--r-sm); }
-  .topbar-brand span {
-    font-family: var(--serif);
-    font-size: var(--t-body);
-    letter-spacing: 0.2em;
-    color: var(--text);
-    font-weight: 600;
   }
 
   /* ── SIDEBAR (macOS material) ─────────────────── */
@@ -439,6 +385,11 @@
   button.album-label { cursor: pointer; }
   button.album-label:active { color: var(--gold); }
 
+  /* Swipe-reveal actions (mobile only, see the 760px block); on desktop
+     the same two actions are reachable through the row's right-click menu. */
+  .song-item-wrap { position: relative; }
+  .song-item-actions { display: none; }
+
   .song-item {
     position: relative;
     padding: var(--s3) var(--s3) var(--s3) calc(var(--s3) + 3px);
@@ -474,7 +425,7 @@
   .song-item.status-final::before { background: var(--ok); }
   .song-item:hover { background: var(--bg-elev); }
   .song-item:hover .song-title-s { color: var(--text); }
-  .song-item:focus-visible, .recent-item:focus-visible, .topbar-brand:focus-visible {
+  .song-item:focus-visible, .recent-item:focus-visible {
     outline: 2px solid var(--gold);
     outline-offset: 2px;
   }
@@ -586,6 +537,9 @@
   }
   .song-grid-main { grid-column: span 3; min-width: 0; }
   .song-grid-side { grid-column: span 2; min-width: 0; }
+  .song-mobile-tabs { display: none; }
+  .mobile-bar { display: none; }
+  .mobile-bar-fade { display: none; }
   @media (max-width: 900px) {
     .song-grid { grid-template-columns: 1fr; gap: 0; }
     .song-grid-main, .song-grid-side { grid-column: 1; }
@@ -740,7 +694,8 @@
     transition: transform var(--dur) var(--ease);
   }
   .detail-collapsible.open .detail-collapsible-toggle .chev { transform: rotate(90deg); }
-  .detail-collapsible-body { padding: 0 0 var(--s4); }
+  .detail-collapsible-body { display: none; padding: 0 0 var(--s4); }
+  .detail-collapsible.open .detail-collapsible-body { display: block; }
   .detail-collapsible-body .section:last-child { margin-bottom: 0; }
 
   .lyrics {
@@ -1165,6 +1120,24 @@
     box-shadow: var(--shadow-2);
   }
   .modal h2 { font-family: var(--sans); font-size: var(--t-lead); letter-spacing: -0.01em; margin-bottom: var(--s2); font-weight: 600; }
+  /* Plain row buttons -- used for the "more" bottom sheet (mobile bar) and
+     the song row's right-click menu (desktop). */
+  .mobile-more-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 44px;
+    background: none;
+    border: none;
+    border-top: 1px solid var(--hairline);
+    color: var(--text);
+    font-size: var(--t-body);
+    font-family: var(--sans);
+    text-align: left;
+    cursor: pointer;
+  }
+  .mobile-more-item:first-child { border-top: none; }
+  .mobile-more-item.danger { color: var(--danger); }
   .modal p { color: var(--text-dim); font-size: var(--t-caption); margin-bottom: var(--s4); line-height: 1.6; }
   .modal textarea {
     width: 100%;
@@ -1364,38 +1337,19 @@
   .toast.success { color: var(--text); }
   .toast.error { color: var(--danger); }
 
-  .sidebar-backdrop {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.45);
-    z-index: 44;
-  }
-
   /* ── MOBILE ─────────────────────────────────── */
   @media (max-width: 760px) {
-    :root { --topbar-h: calc(52px + env(safe-area-inset-top)); --clearance: 70px; }
+    :root { --clearance: 70px; }
     .app { grid-template-columns: 1fr; }
-    .topbar { display: flex; }
     .song-item { min-height: 62px; }
 
-    .sidebar {
-      position: fixed;
-      top: 0; left: 0; bottom: 0;
-      width: 84%;
-      max-width: 320px;
-      z-index: 46;
-      transform: translateX(-105%);
-      transition: transform 0.32s cubic-bezier(0.25, 1, 0.35, 1);
-      box-shadow: 10px 0 50px rgba(0,0,0,0.45);
-      padding-top: env(safe-area-inset-top);
-      background: var(--bg-panel);
-    }
-    body.menu-open .sidebar { transform: translateX(0); }
-    body.menu-open .sidebar-backdrop { display: block; }
+    /* Two screens, not a drawer: List (.sidebar) and Detail (.detail) each
+       take the full screen; only one is visible at a time. */
+    .sidebar { padding-top: env(safe-area-inset-top); }
+    body.mobile-detail .sidebar { display: none; }
+    body:not(.mobile-detail) .detail { display: none; }
 
-    .detail { padding-top: var(--topbar-h); }
-    .detail-inner { padding: var(--s6) var(--s4) var(--clearance); }
+    .detail-inner { padding: calc(var(--s6) + env(safe-area-inset-top)) var(--s4) var(--clearance); }
     .detail-title { font-size: var(--t-h2); }
     .detail-head { flex-direction: column; gap: var(--s3); }
     .detail-actions { padding-top: 0; width: 100%; }
@@ -1411,7 +1365,7 @@
 
     .lyric-head { flex-direction: column; align-items: flex-start; gap: var(--s2); }
     .lyric-actions { width: 100%; }
-    .lyric-actions .mini-btn { flex: 1; min-height: 42px; }
+    .lyric-actions .mini-btn { flex: 1; min-height: 44px; }
     .lyrics { font-size: var(--t-body); }
 
     .cover-img { max-height: 300px; }
@@ -1420,7 +1374,7 @@
     .analysis-head { flex-direction: column; align-items: stretch; }
     .ai-btn { min-height: 44px; }
 
-    .home { padding: var(--s5) var(--s4) var(--clearance); }
+    .home { padding: calc(var(--s5) + env(safe-area-inset-top)) var(--s4) var(--clearance); }
     .home-logo { width: 66px; height: 66px; }
     .home-title { font-size: var(--t-h3); }
     .home-stats { gap: var(--s2); }
@@ -1448,4 +1402,132 @@
       margin: 0 auto var(--s4);
     }
     .gate-box { padding: var(--s6) var(--s5); }
+
+    /* Inputs under 16px make Safari zoom the page on focus. */
+    .field input, .field textarea, .field select,
+    .search-wrap input, .gate-input { font-size: 16px; }
+
+    /* ── FLOATING BAR (List and Detail screens) ── */
+    .mobile-bar {
+      display: none;
+      position: fixed;
+      left: 16px;
+      bottom: calc(30px + env(safe-area-inset-bottom));
+      width: calc(100% - 32px);
+      height: 56px;
+      z-index: 45;
+      align-items: center;
+      gap: var(--s2);
+      padding: 0 var(--s2);
+      background: var(--bg-elev);
+      border-radius: var(--r-lg);
+      border: 1px solid rgba(236, 232, 225, 0.07);
+      border-top-color: rgba(201, 168, 106, 0.2);
+      box-shadow: var(--shadow-2);
+    }
+    .mobile-bar.visible { display: flex; }
+    .mobile-bar-fade {
+      display: none;
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      height: 130px;
+      background: linear-gradient(to bottom, transparent, var(--bg) 78%);
+      pointer-events: none;
+      z-index: 40;
+    }
+    .mobile-bar.visible + .mobile-bar-fade { display: block; }
+    .mobile-bar-icon {
+      width: 44px; height: 44px;
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: var(--t-lead);
+      cursor: pointer;
+    }
+    .mobile-bar-icon:hover { background: var(--bg-fill); color: var(--text); }
+    .mobile-bar-primary {
+      flex: 1;
+      min-height: 44px;
+      background: linear-gradient(155deg, var(--gold), var(--gold-soft));
+      border: none;
+      border-radius: var(--r-md);
+      color: #1a150b;
+      font-size: var(--t-body);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .mobile-bar-action {
+      flex: 1;
+      min-height: 44px;
+      background: var(--bg-fill);
+      border: none;
+      border-radius: var(--r-md);
+      color: var(--text);
+      font-size: var(--t-caption);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* ── SONG DETAIL: MOBILE TABS ── */
+    .song-mobile-tabs {
+      display: flex;
+      gap: var(--s1);
+      margin-bottom: var(--s5);
+      background: var(--bg-elev);
+      border-radius: var(--r-sm);
+      padding: var(--s1);
+    }
+    .song-tab-btn {
+      flex: 1;
+      min-height: 44px;
+      background: none;
+      border: none;
+      border-radius: var(--r-sm);
+      color: var(--text-dim);
+      font-size: var(--t-caption);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .song-tab-btn.on { background: var(--bg-fill); color: var(--text); }
+    body.light .song-tab-btn.on { background: #fff; }
+    .song-tab-panel { display: none; }
+    .song-grid[data-active-tab="lyrics"] .song-tab-panel[data-tab="lyrics"],
+    .song-grid[data-active-tab="production"] .song-tab-panel[data-tab="production"],
+    .song-grid[data-active-tab="prompt"] .song-tab-panel[data-tab="prompt"],
+    .song-grid[data-active-tab="more"] .song-tab-panel[data-tab="more"] { display: block; }
+    /* On mobile the tab already gates disclosure, so the collapsible cards
+       inside the "More" tab render open, with the toggle inert. */
+    .song-grid-side .detail-collapsible-toggle { pointer-events: none; }
+    .song-grid-side .detail-collapsible-toggle .chev { display: none; }
+    .song-grid-side .detail-collapsible-body { display: block; }
+    .lyrics { font-size: 21px; line-height: 1.5; }
+
+    /* ── SONG ROW SWIPE ACTIONS (reveal: copy lyrics, change status) ── */
+    .song-item-wrap { overflow: hidden; border-radius: var(--r-md); }
+    .song-item-actions {
+      position: absolute;
+      top: 0; right: 0; bottom: 0;
+      width: 112px;
+      display: none;
+      align-items: center;
+      justify-content: flex-end;
+      gap: var(--s2);
+      padding-right: var(--s2);
+    }
+    .song-item-wrap.swiped .song-item-actions,
+    .song-item-wrap.swiped-dragging .song-item-actions { display: flex; }
+    .song-item-action {
+      width: 44px; height: 44px;
+      flex-shrink: 0;
+      background: var(--bg-fill);
+      border: none;
+      border-radius: var(--r-md);
+      color: var(--text-dim);
+      font-size: var(--t-lead);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
   }
