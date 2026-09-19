@@ -1162,16 +1162,17 @@
     position: fixed;
     inset: 0;
     z-index: 300;
-    background: var(--bg);
+    background: #0a0908;
     display: none;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
+  body.light .perf-overlay { background: var(--bg); }
   .perf-overlay.visible { display: block; }
   .perf-inner {
     max-width: 920px;
     margin: 0 auto;
-    padding: var(--s5) var(--s5) var(--clearance);
+    padding: var(--s5) var(--s5) 100px;
     padding-top: calc(26px + env(safe-area-inset-top));
   }
   .perf-head {
@@ -1198,7 +1199,7 @@
     color: var(--text-dim);
     margin-top: var(--s1);
   }
-  .perf-controls { display: flex; gap: var(--s2); flex-wrap: wrap; }
+  .perf-controls { display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; }
   .perf-btn {
     background: var(--bg-elev);
     border: none;
@@ -1209,107 +1210,144 @@
     cursor: pointer;
     min-height: 36px;
   }
+  .perf-btn.on { background: var(--gold); color: var(--bg); font-weight: 600; }
+  .perf-saved { font-size: var(--t-micro); color: var(--text-faint); }
+
+  /* ── SECTIONS: label above the stanza, all gold ── */
   .perf-section {
     display: flex;
-    gap: var(--s5);
+    flex-direction: column;
+    gap: var(--s3);
     padding: var(--s5) 0;
     border-bottom: 1px solid var(--hairline);
   }
-  .perf-label-wrap { width: 120px; flex-shrink: 0; }
+  .perf-label-wrap { width: auto; }
   .perf-label {
-    font-size: calc(14px * var(--perf-scale, 1));
-    font-weight: 700;
-    letter-spacing: 0.08em;
+    font-size: var(--t-caption);
+    font-weight: 600;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    padding-bottom: var(--s1);
-    border-bottom: 2px solid currentColor;
-    display: inline-block;
+    color: var(--gold);
   }
   .perf-hint {
-    display: block;
-    font-size: calc(12px * var(--perf-scale, 1));
+    display: inline;
+    font-size: var(--t-caption);
+    font-style: italic;
     font-weight: 400;
     text-transform: none;
     letter-spacing: 0;
-    color: var(--text-dim);
-    margin-top: var(--s1);
+    color: var(--text-faint);
+    margin-left: var(--s2);
   }
-  .perf-verse { color: #5b82c7; }
-  .perf-pre { color: #9a6fc7; }
-  .perf-chorus { color: #5f9e6e; }
-  .perf-bridge { color: #c78a4a; }
-  .perf-other { color: var(--gold); }
-  .perf-lines { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s4); }
-  .perf-line { display: flex; gap: var(--s4); align-items: baseline; }
+
+  /* ── LINES: 660px text column, comments in the right margin ── */
+  .perf-lines { display: flex; flex-direction: column; gap: var(--s4); }
+  .perf-line { display: flex; gap: var(--s5); align-items: flex-start; }
   .perf-lyric {
-    flex: 1;
-    font-size: calc(21px * var(--perf-scale, 1));
-    line-height: 1.35;
+    flex: 0 0 660px;
+    max-width: 660px;
+    font-size: calc(27px * var(--perf-scale, 1));
+    line-height: 1.45;
     color: var(--text);
-    font-weight: 500;
+    font-weight: 300;
   }
   .perf-note {
-    width: 150px;
-    flex-shrink: 0;
-    font-size: calc(13px * var(--perf-scale, 1));
-    line-height: 1.4;
-    color: var(--gold);
-    font-weight: 700;
-    text-align: left;
-  }
-  .perf-note.accent { color: #9a6fc7; }
-  .perf-edit-cols {
-    display: flex;
-    gap: var(--s2);
-    height: 62vh;
-  }
-  .perf-edit-col {
-    display: flex;
-    flex-direction: column;
+    flex: 1;
     min-width: 0;
+    font-size: var(--t-caption);
+    font-style: italic;
+    line-height: 1.4;
+    color: var(--text-dim);
   }
-  .perf-edit-col.lyrics { flex: 3; }
-  .perf-edit-col.notes { flex: 2; }
-  .perf-edit-col label {
+  .perf-note::before {
+    content: '';
+    display: block;
+    width: 16px;
+    height: 2px;
+    background: var(--gold);
+    margin-bottom: var(--s2);
+  }
+  .perf-inner.notes-hidden .perf-note { display: none; }
+
+  /* ── JUMP-TO-SECTION FLOATING BAR ── */
+  .perf-jump {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    max-width: calc(100% - 48px);
+    display: flex;
+    gap: var(--s1);
+    overflow-x: auto;
+    background: var(--bg-elev);
+    border: 1px solid rgba(236, 232, 225, 0.07);
+    border-top-color: rgba(201, 168, 106, 0.2);
+    border-radius: var(--r-lg);
+    padding: var(--s1);
+    box-shadow: var(--shadow-2);
+    z-index: 10;
+  }
+  .perf-jump-btn {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    border-radius: var(--r-sm);
+    padding: var(--s2) var(--s4);
+    min-height: 44px;
+    font-size: var(--t-caption);
+    color: var(--text-dim);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .perf-jump-btn.on { background: var(--gold); color: var(--bg); font-weight: 600; }
+
+  /* ── COMMENT EDITOR: row by row ── */
+  .perf-edit-shortcuts { display: flex; gap: var(--s2); flex-wrap: wrap; margin: var(--s4) 0; }
+  .perf-edit-rows { display: flex; flex-direction: column; }
+  .perf-edit-gap { height: var(--s5); }
+  .perf-edit-row {
+    display: flex;
+    align-items: center;
+    gap: var(--s4);
+    padding: var(--s2) 0;
+  }
+  .perf-edit-lyric {
+    flex: 1;
+    min-width: 0;
+    font-size: var(--t-body);
+    color: var(--text-dim);
+  }
+  .perf-edit-row.has-note .perf-edit-lyric { color: var(--text); }
+  .perf-edit-num {
+    display: inline-block;
+    width: 28px;
+    color: var(--text-faint);
+    font-family: var(--mono);
     font-size: var(--t-micro);
+    font-variant-numeric: tabular-nums;
+  }
+  .perf-edit-row.section .perf-edit-lyric {
+    color: var(--gold);
+    font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--text-faint);
-    margin-bottom: var(--s1);
-    font-weight: 600;
   }
-  .perf-edit-col textarea {
-    flex: 1;
-    width: 100%;
-    background: var(--bg-elev);
-    border: none;
+  .perf-edit-note {
+    width: 280px;
+    flex-shrink: 0;
+    height: 38px;
+    background: transparent;
+    border: 1px solid var(--hairline);
     border-radius: var(--r-md);
-    padding: var(--s3);
+    padding: 0 var(--s3);
     color: var(--text);
-    font-family: var(--mono);
+    font-family: var(--sans);
     font-size: var(--t-caption);
-    line-height: 1.8;
     outline: none;
-    resize: none;
-    white-space: pre;
-    overflow: auto;
   }
-  .perf-edit-col.lyrics textarea { color: var(--text-dim); }
-  .perf-edit-col.notes textarea { color: var(--gold); font-weight: 700; }
-  .perf-edit-help {
-    font-size: var(--t-caption);
-    color: var(--text-faint);
-    margin: var(--s3) 0 var(--s4);
-    line-height: 1.6;
-  }
-  @media (max-width: 760px) {
-    .perf-inner { padding: var(--s4) var(--s4) var(--clearance); padding-top: calc(18px + env(safe-area-inset-top)); }
-    .perf-section { flex-direction: column; gap: var(--s3); padding: var(--s4) 0; }
-    .perf-label-wrap { width: auto; }
-    .perf-line { flex-wrap: wrap; gap: var(--s1) var(--s3); }
-    .perf-lyric { flex-basis: 100%; font-size: calc(19px * var(--perf-scale, 1)); }
-    .perf-note { width: auto; margin-left: auto; text-align: right; }
-  }
+  .perf-edit-row.has-note .perf-edit-note { background: var(--bg-elev); border-color: transparent; }
+  .perf-edit-row.section .perf-edit-note { border-color: var(--gold); }
+  .perf-edit-note:focus { box-shadow: 0 0 0 3px var(--gold-glow); }
 
   /* ── TOAST ─────────────────────────────────── */
   .toast {
