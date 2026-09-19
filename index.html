@@ -302,7 +302,7 @@ function renderSidebar() {
   });
 
   if (filtered.length === 0) {
-    list.innerHTML = `<div style="padding:30px 14px;color:var(--text-faint);font-size:13px;text-align:center;">${catalog.length === 0 ? 'No songs yet.<br>Add your first one.' : 'No matches.'}</div>`;
+    list.innerHTML = `<div style="padding:30px 14px;color:var(--text-faint);font-size: var(--t-caption);text-align:center;">${catalog.length === 0 ? 'No songs yet.<br>Add your first one.' : 'No matches.'}</div>`;
     return;
   }
 
@@ -432,7 +432,7 @@ function showHome() {
         <span><i style="background:var(--prod)"></i>In production ${byStatus.production}</span>
         <span><i style="background:var(--final)"></i>Final ${byStatus.final}</span>
       </div>
-    </div>` : `<div style="color:var(--text-faint);font-size:13.5px;margin-bottom:34px;">The catalog is empty. Add your first song.</div>`;
+    </div>` : `<div style="color:var(--text-faint);font-size: var(--t-caption);margin-bottom:34px;">The catalog is empty. Add your first song.</div>`;
 
   document.getElementById('detail').innerHTML = `
   <div class="home">
@@ -523,7 +523,7 @@ function renderAlbumPage(name) {
       </div>
       <span class="badge pipeline-${t.pipelineStatus || 'idea'}">${esc(pipelineLabel(t.pipelineStatus))}</span>
       <button class="perf-btn" style="flex-shrink:0;" onclick="event.stopPropagation(); openPerfViewFor('${jsAttr(t.id)}')" title="Performance view">♪</button>
-    </div>`).join('') : `<div style="color:var(--text-faint);font-size:13.5px;padding:20px 0;">No songs in this album yet.</div>`;
+    </div>`).join('') : `<div style="color:var(--text-faint);font-size: var(--t-caption);padding:20px 0;">No songs in this album yet.</div>`;
 
   document.getElementById('detail').innerHTML = `
   <div class="detail-inner">
@@ -618,7 +618,7 @@ function showAlbumEditForm() {
         <div class="cover-upload-row">
           <div id="albumCoverPreviewWrap">${a.cover ? `<img id="albumCoverPreview" class="cover-preview" src="${a.cover}">` : `<div id="albumCoverPreview" class="cover-preview-empty">No image</div>`}</div>
           <div style="display:flex;flex-direction:column;gap:8px;">
-            <input type="file" id="fa_cover_file" accept="image/*" onchange="handleAlbumCoverUpload(event)" style="font-size:12px;color:var(--text-dim);">
+            <input type="file" id="fa_cover_file" accept="image/*" onchange="handleAlbumCoverUpload(event)" style="font-size: var(--t-caption);color:var(--text-dim);">
             ${a.cover ? `<button class="btn" style="flex:0;" onclick="removeAlbumCover()">Remove image</button>` : ''}
           </div>
         </div>
@@ -762,7 +762,7 @@ function openPerfView() {
 
   let body = '';
   if (!sections.length) {
-    body = `<div style="padding:40px 0;color:var(--text-faint);font-size:14px;">No lyrics yet. Add lyrics to the song, or press Edit to write the performance sheet directly.</div>`;
+    body = `<div style="padding:40px 0;color:var(--text-faint);font-size: var(--t-caption);">No lyrics yet. Add lyrics to the song, or press Edit to write the performance sheet directly.</div>`;
   } else {
     body = sections.map(sec => `
       <div class="perf-section">
@@ -895,7 +895,7 @@ function renderLyricsHistory(s) {
   // Slice first, then escape \u2014 slicing escaped text can cut an entity in half.
   const items = [...s.lyricsHistory].reverse().map(h => {
     const raw = String(h.text || '');
-    return `<div class="text-block mono" style="font-size:12px;margin-bottom:10px;"><div style="color:var(--text-faint);margin-bottom:4px;">${esc(new Date(h.timestamp).toLocaleString())}</div>${esc(raw.slice(0, 300))}${raw.length > 300 ? '\u2026' : ''}</div>`;
+    return `<div class="text-block mono" style="font-size: var(--t-caption);margin-bottom:10px;"><div style="color:var(--text-faint);margin-bottom:4px;">${esc(new Date(h.timestamp).toLocaleString())}</div>${esc(raw.slice(0, 300))}${raw.length > 300 ? '\u2026' : ''}</div>`;
   }).join('');
   return `<div class="section"><div class="section-label">Lyrics history (${s.lyricsHistory.length})</div>${items}</div>`;
 }
@@ -934,7 +934,7 @@ function showDetail() {
       <div class="spec"><div class="k">BPM</div><div class="v">${esc(s.bpm) || '\u2014'}</div></div>
       <div class="spec"><div class="k">Key</div><div class="v">${esc(s.key) || '\u2014'}</div></div>
       <div class="spec"><div class="k">Duration</div><div class="v">${esc(s.duration) || '\u2014'}</div></div>
-      <div class="spec"><div class="k">Genre</div><div class="v" style="font-family:var(--sans);font-size:13px;">${esc(s.genre) || '\u2014'}</div></div>
+      <div class="spec"><div class="k">Genre</div><div class="v" style="font-family:var(--sans);font-size: var(--t-caption);">${esc(s.genre) || '\u2014'}</div></div>
     </div>
     <div class="section">
       <div class="section-label">Vocalist master</div>
@@ -1022,10 +1022,10 @@ function printLyrics() {
       html, body { margin:0; padding:0; }
       body { font-family: Georgia, serif; color:#111; line-height:1.7; }
       .sheet { max-width:620px; margin:0 auto; padding:8px 24px 24px; text-align:center; }
-      h1 { font-size:28px; margin:0 0 6px; letter-spacing:0.02em; }
-      .sub { color:#777; font-size:13px; margin-bottom:24px; text-transform:uppercase; letter-spacing:0.1em; }
-      pre { font-family: Georgia, serif; font-size:15px; white-space:pre-wrap; line-height:1.85; text-align:center; margin:0; }
-      .tag { color:#b5483d; font-weight:600; font-size:13px; }
+      h1 { font-size: 28px; margin:0 0 6px; letter-spacing:0.02em; }
+      .sub { color:#777; font-size: 13px; margin-bottom:24px; text-transform:uppercase; letter-spacing:0.1em; }
+      pre { font-family: Georgia, serif; font-size: 15px; white-space:pre-wrap; line-height:1.85; text-align:center; margin:0; }
+      .tag { color:#b5483d; font-weight:600; font-size: 13px; }
     </style></head><body>
     <div class="sheet">
       <h1>${safeTitle}</h1>
@@ -1131,7 +1131,7 @@ function showEditForm(s) {
         <div class="cover-upload-row">
           <div id="coverPreviewWrap">${s.cover ? `<img id="coverPreview" class="cover-preview" src="${s.cover}">` : `<div id="coverPreview" class="cover-preview-empty">No image</div>`}</div>
           <div style="display:flex;flex-direction:column;gap:8px;">
-            <input type="file" id="f_cover_file" accept="image/*" onchange="handleCoverUpload(event)" style="font-size:12px;color:var(--text-dim);">
+            <input type="file" id="f_cover_file" accept="image/*" onchange="handleCoverUpload(event)" style="font-size: var(--t-caption);color:var(--text-dim);">
             ${s.cover ? `<button class="btn" style="flex:0;" onclick="removeCover()">Remove image</button>` : ''}
           </div>
         </div>

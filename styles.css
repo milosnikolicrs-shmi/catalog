@@ -34,6 +34,15 @@
     --s7: 48px;
     --s8: 64px;
 
+    /* ── TYPE SCALE ── */
+    --t-micro: 11px;
+    --t-caption: 13px;
+    --t-body: 15px;
+    --t-lead: 18px;
+    --t-h3: 22px;
+    --t-h2: 30px;
+    --t-h1: 42px;
+
     /* ── MOTION ── */
     --dur: 150ms;
     --ease: cubic-bezier(0.32, 0.72, 0, 1);
@@ -152,7 +161,7 @@
     background: none;
     border: none;
     color: var(--gold);
-    font-size: 20px;
+    font-size: var(--t-lead);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -178,7 +187,7 @@
   .topbar-brand img { width: 26px; height: 26px; object-fit: contain; border-radius: 6px; }
   .topbar-brand span {
     font-family: var(--serif);
-    font-size: 17px;
+    font-size: var(--t-body);
     letter-spacing: 0.2em;
     color: var(--text);
     font-weight: 600;
@@ -211,7 +220,7 @@
     border: none;
     border-radius: 7px;
     color: var(--text-faint);
-    font-size: 13px;
+    font-size: var(--t-caption);
     cursor: pointer;
     transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
   }
@@ -235,20 +244,20 @@
   body.rail .song-num { display: none; }
   body.rail .song-item::before { left: 2px; }
   body.rail .sidebar-foot { padding: var(--s2); flex-direction: column; }
-  body.rail .sidebar-foot .btn { padding: var(--s2) 0; font-size: 11px; }
+  body.rail .sidebar-foot .btn { padding: var(--s2) 0; font-size: var(--t-micro); }
   @media (max-width: 760px) {
     .collapse-btn { display: none; }
     body.rail .app { grid-template-columns: 1fr; }
   }
   .brand h1 {
     font-family: var(--serif);
-    font-size: 23px;
+    font-size: var(--t-h3);
     font-weight: 600;
     letter-spacing: 0.22em;
     color: var(--text);
   }
   .brand .sub {
-    font-size: 10px;
+    font-size: var(--t-micro);
     color: var(--gold-soft);
     letter-spacing: 0.32em;
     text-transform: uppercase;
@@ -275,7 +284,7 @@
     border-radius: 10px;
     padding: 10px var(--s3) 10px var(--s6);
     color: var(--text);
-    font-size: 16px;
+    font-size: var(--t-body);
     outline: none;
     box-shadow: inset 0 0.5px 0 var(--glass-highlight), var(--shadow-1);
     transition: box-shadow var(--dur) var(--ease), background var(--dur) var(--ease);
@@ -284,7 +293,7 @@
     box-shadow: inset 0 0.5px 0 var(--glass-highlight), 0 0 0 3px var(--gold-glow);
     background: var(--bg-fill);
   }
-  .search-wrap input::placeholder { color: var(--text-faint); font-size: 13.5px; }
+  .search-wrap input::placeholder { color: var(--text-faint); font-size: var(--t-caption); }
 
   /* ── SEGMENTED CONTROLS ───────────────────────── */
   .filters {
@@ -307,7 +316,7 @@
     border: none;
     border-radius: 7px;
     padding: 6px 4px;
-    font-size: 12px;
+    font-size: var(--t-caption);
     color: var(--text-dim);
     cursor: pointer;
     transition: background 0.15s, color 0.15s, transform 0.12s;
@@ -335,7 +344,7 @@
     border: none;
     border-radius: 20px;
     padding: 5px 12px;
-    font-size: 12px;
+    font-size: var(--t-caption);
     color: var(--text-dim);
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
@@ -366,14 +375,14 @@
   .palette-swatch { width: 26px; height: 26px; border-radius: 7px; box-shadow: var(--shadow-1); border: 0.5px solid var(--hairline); }
 
   .credits-list { display: flex; flex-wrap: wrap; gap: 8px; }
-  .credit-chip { background: var(--bg-elev); border-radius: 8px; padding: 6px 12px; font-size: 13px; color: var(--text); }
-  .credit-chip .role { color: var(--text-faint); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; margin-left: 6px; }
+  .credit-chip { background: var(--bg-elev); border-radius: 8px; padding: 6px 12px; font-size: var(--t-caption); color: var(--text); }
+  .credit-chip .role { color: var(--text-faint); font-size: var(--t-micro); text-transform: uppercase; letter-spacing: 0.05em; margin-left: 6px; }
 
   .album-header { display: flex; gap: 24px; margin-bottom: 28px; }
   .album-header .cover-img { max-width: 220px; margin-bottom: 0; }
   .album-header-info { flex: 1; min-width: 0; }
   .album-meta-row { display: flex; flex-wrap: wrap; gap: 18px; margin: 14px 0; }
-  .album-meta-item { font-size: 13px; color: var(--text-dim); }
+  .album-meta-item { font-size: var(--t-caption); color: var(--text-dim); }
   .album-meta-item b { color: var(--text); font-weight: 600; }
 
   .track-row {
@@ -385,17 +394,17 @@
     cursor: pointer;
     transition: background 0.15s;
   }
-  .track-row .song-num { color: var(--text-faint); font-family: var(--mono); font-size: 12px; width: 22px; }
+  .track-row .song-num { color: var(--text-faint); font-family: var(--mono); font-size: var(--t-caption); width: 22px; }
   .track-row .track-meta { flex: 1; min-width: 0; }
-  .track-row .track-title { font-size: 15px; color: var(--text); }
-  .track-row .track-sub { font-size: 12px; color: var(--text-faint); margin-top: 2px; }
+  .track-row .track-title { font-size: var(--t-body); color: var(--text); }
+  .track-row .track-sub { font-size: var(--t-caption); color: var(--text-faint); margin-top: 2px; }
   .track-reorder { display: flex; flex-direction: column; gap: 2px; }
   .track-reorder button {
     background: var(--bg-elev);
     border: none;
     border-radius: 5px;
     color: var(--text-dim);
-    font-size: 10px;
+    font-size: var(--t-micro);
     width: 20px;
     height: 16px;
     cursor: pointer;
@@ -418,7 +427,7 @@
     background: none;
     border: none;
     font-family: inherit;
-    font-size: 10.5px;
+    font-size: var(--t-micro);
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--text-faint);
@@ -468,7 +477,7 @@
   .song-item.active .song-title-s { color: var(--gold); }
   .song-num {
     font-family: var(--mono);
-    font-size: 10.5px;
+    font-size: var(--t-micro);
     color: var(--text-faint);
     min-width: 20px;
   }
@@ -483,7 +492,7 @@
   .song-meta { flex: 1; min-width: 0; }
   .song-title-s {
     font-family: var(--serif);
-    font-size: 15px;
+    font-size: var(--t-body);
     color: var(--text);
     white-space: nowrap;
     overflow: hidden;
@@ -491,7 +500,7 @@
     transition: color var(--dur) var(--ease);
   }
   .song-sub-s {
-    font-size: 11px;
+    font-size: var(--t-micro);
     color: var(--text-faint);
     margin-top: var(--s1);
     white-space: nowrap;
@@ -507,7 +516,7 @@
     align-items: center;
     padding: 0 var(--s2);
     border-radius: 100px;
-    font-size: 9.5px;
+    font-size: var(--t-micro);
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -531,7 +540,7 @@
     color: var(--text);
     border-radius: 10px;
     padding: 10px 12px;
-    font-size: 13px;
+    font-size: var(--t-caption);
     font-weight: 500;
     cursor: pointer;
     transition: background 0.13s, transform 0.12s, color 0.13s;
@@ -567,7 +576,7 @@
     background: none;
     border: none;
     color: var(--gold);
-    font-size: 15px;
+    font-size: var(--t-body);
     cursor: pointer;
     padding: 6px 0;
     margin-bottom: 10px;
@@ -586,7 +595,7 @@
   }
   .detail-title {
     font-family: var(--serif);
-    font-size: 38px;
+    font-size: var(--t-h1);
     font-weight: 600;
     letter-spacing: 0.005em;
     line-height: 1.12;
@@ -598,7 +607,7 @@
     color: var(--text);
     border-radius: 10px;
     padding: 9px 16px;
-    font-size: 13px;
+    font-size: var(--t-caption);
     font-weight: 500;
     cursor: pointer;
     transition: background 0.13s, transform 0.12s, color 0.13s;
@@ -609,7 +618,7 @@
 
   .badges { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 28px; }
   .badge {
-    font-size: 11px;
+    font-size: var(--t-micro);
     font-weight: 600;
     letter-spacing: 0.05em;
     padding: 5px 12px;
@@ -646,18 +655,18 @@
     box-shadow: var(--shadow-1);
   }
   .spec .k {
-    font-size: 9.5px;
+    font-size: var(--t-micro);
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--gold-soft);
     margin-bottom: 6px;
     font-weight: 600;
   }
-  .spec .v { font-size: 15px; color: var(--text); font-family: var(--mono); }
+  .spec .v { font-size: var(--t-body); color: var(--text); font-family: var(--mono); }
 
   .section { margin-bottom: 32px; }
   .section-label {
-    font-size: 12px;
+    font-size: var(--t-caption);
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--gold);
@@ -667,7 +676,7 @@
 
   .lyrics {
     font-family: var(--sans);
-    font-size: 16.5px;
+    font-size: var(--t-body);
     line-height: 1.9;
     white-space: pre-wrap;
     color: var(--text-read);
@@ -676,7 +685,7 @@
   .lyrics .tag {
     color: var(--gold);
     font-family: var(--mono);
-    font-size: 11px;
+    font-size: var(--t-micro);
     letter-spacing: 0.14em;
     text-transform: uppercase;
   }
@@ -685,13 +694,13 @@
     background: var(--bg-panel);
     border-radius: 14px;
     padding: 17px 19px;
-    font-size: 14.5px;
+    font-size: var(--t-caption);
     line-height: 1.7;
     color: var(--text-read);
     white-space: pre-wrap;
     box-shadow: var(--shadow-1);
   }
-  .text-block.mono { font-family: var(--mono); font-size: 13px; color: var(--text-dim); }
+  .text-block.mono { font-family: var(--mono); font-size: var(--t-caption); color: var(--text-dim); }
 
   .suno-block { position: relative; padding-right: 78px; }
   .copy-btn {
@@ -702,7 +711,7 @@
     color: var(--text-dim);
     border-radius: 8px;
     padding: 6px 12px;
-    font-size: 11.5px;
+    font-size: var(--t-micro);
     font-weight: 500;
     cursor: pointer;
     transition: all 0.13s;
@@ -724,7 +733,7 @@
     color: #1a150b;
     border-radius: 10px;
     padding: 9px 16px;
-    font-size: 12.5px;
+    font-size: var(--t-caption);
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
@@ -742,7 +751,7 @@
     border-radius: 999px;
     padding: 9px 16px;
     color: var(--text);
-    font-size: 12.5px;
+    font-size: var(--t-caption);
     font-weight: 500;
     text-decoration: none;
     transition: background 0.13s, transform 0.12s;
@@ -760,7 +769,7 @@
     color: var(--text);
     border-radius: 9px;
     padding: 7px 13px;
-    font-size: 12px;
+    font-size: var(--t-caption);
     font-weight: 500;
     cursor: pointer;
     transition: background 0.13s, transform 0.12s, color 0.13s;
@@ -778,7 +787,7 @@
     border-radius: 14px;
     padding: 14px 17px;
     color: var(--text-faint);
-    font-size: 13px;
+    font-size: var(--t-caption);
     flex-wrap: wrap;
     box-shadow: var(--shadow-1);
   }
@@ -788,7 +797,7 @@
     color: var(--text);
     border-radius: 9px;
     padding: 8px 15px;
-    font-size: 12.5px;
+    font-size: var(--t-caption);
     font-weight: 500;
     cursor: pointer;
     margin-left: auto;
@@ -808,14 +817,14 @@
   .home-logo { width: 72px; height: 72px; object-fit: contain; border-radius: 18px; margin-bottom: var(--s4); box-shadow: var(--shadow-2); align-self: flex-start; }
   .home-title {
     font-family: var(--serif);
-    font-size: 29px;
+    font-size: var(--t-h2);
     letter-spacing: 0.22em;
     color: var(--text);
     margin-bottom: var(--s1);
     font-weight: 600;
   }
   .home-sub {
-    font-size: 10.5px;
+    font-size: var(--t-micro);
     letter-spacing: 0.32em;
     text-transform: uppercase;
     color: var(--gold-soft);
@@ -827,7 +836,7 @@
     color: #1a150b;
     border-radius: 13px;
     padding: var(--s4) var(--s6);
-    font-size: 15px;
+    font-size: var(--t-body);
     font-weight: 600;
     cursor: pointer;
     transition: filter var(--dur) var(--ease), transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
@@ -852,7 +861,7 @@
   }
   .stat-num {
     font-family: var(--sans);
-    font-size: 31px;
+    font-size: var(--t-h2);
     font-weight: 500;
     letter-spacing: -0.02em;
     color: var(--gold);
@@ -860,7 +869,7 @@
     margin-bottom: var(--s2);
   }
   .stat-label {
-    font-size: 9.5px;
+    font-size: var(--t-micro);
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--text-faint);
@@ -887,12 +896,12 @@
   .status-bar .seg-production { background: var(--prod); }
   .status-bar .seg-final { background: var(--final); }
   .status-legend { display: flex; gap: var(--s4); flex-wrap: wrap; }
-  .status-legend span { font-size: 11.5px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; }
+  .status-legend span { font-size: var(--t-micro); color: var(--text-dim); display: flex; align-items: center; gap: 6px; }
   .status-legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 
   .home-section-label {
     width: 100%;
-    font-size: 12px;
+    font-size: var(--t-caption);
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--gold);
@@ -924,18 +933,18 @@
   .recent-item::after {
     content: '\203A';
     color: var(--text-faint);
-    font-size: 20px;
+    font-size: var(--t-lead);
     line-height: 1;
     margin-left: 4px;
   }
-  .recent-item .r-title { font-family: var(--serif); font-size: 15.5px; color: var(--text); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .recent-item .r-sub { font-size: 11.5px; color: var(--text-faint); white-space: nowrap; }
+  .recent-item .r-title { font-family: var(--serif); font-size: var(--t-body); color: var(--text); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .recent-item .r-sub { font-size: var(--t-micro); color: var(--text-faint); white-space: nowrap; }
 
   /* ── EDIT FORM ─────────────────────────────────── */
   .form-grid { display: flex; flex-direction: column; gap: 20px; }
   .field { display: flex; flex-direction: column; gap: 7px; }
   .field label {
-    font-size: 11px;
+    font-size: var(--t-micro);
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--gold-soft);
@@ -948,7 +957,7 @@
     border-radius: 11px;
     padding: 12px 14px;
     color: var(--text);
-    font-size: 16px;
+    font-size: var(--t-body);
     font-family: var(--sans);
     outline: none;
     transition: box-shadow 0.15s, background 0.15s;
@@ -961,9 +970,9 @@
   }
   body.light .field input:focus, body.light .field textarea:focus { background: #fff; }
   .field textarea.lyric-area { font-family: var(--sans); min-height: 280px; }
-  .field textarea.mono-area { font-family: var(--mono); font-size: 14px; }
+  .field textarea.mono-area { font-family: var(--mono); font-size: var(--t-caption); }
   .field .seg { background: var(--bg-elev); }
-  .field .seg button { min-height: 36px; font-size: 13px; }
+  .field .seg button { min-height: 36px; font-size: var(--t-caption); }
   .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
@@ -980,7 +989,7 @@
     border-radius: 14px;
     border: 1.5px dashed var(--text-faint);
     display: flex; align-items: center; justify-content: center;
-    color: var(--text-faint); font-size: 11px; text-align: center;
+    color: var(--text-faint); font-size: var(--t-micro); text-align: center;
     opacity: 0.7;
   }
 
@@ -1024,7 +1033,7 @@
   .gate-logo { width: 70px; height: 70px; object-fit: contain; border-radius: 16px; box-shadow: var(--shadow-1); }
   .gate-title {
     font-family: var(--serif);
-    font-size: 21px;
+    font-size: var(--t-lead);
     letter-spacing: 0.18em;
     color: var(--text);
     font-weight: 600;
@@ -1036,7 +1045,7 @@
     border-radius: 11px;
     padding: 13px 14px;
     color: var(--text);
-    font-size: 16px;
+    font-size: var(--t-body);
     outline: none;
     text-align: center;
     letter-spacing: 0.1em;
@@ -1050,14 +1059,14 @@
     color: #1a150b;
     border-radius: 11px;
     padding: 13px;
-    font-size: 14.5px;
+    font-size: var(--t-caption);
     font-weight: 600;
     cursor: pointer;
     transition: filter 0.13s, transform 0.12s;
     min-height: 46px;
   }
   .gate-btn:hover { filter: brightness(1.08); }
-  .gate-error { font-size: 12px; color: var(--danger); min-height: 16px; }
+  .gate-error { font-size: var(--t-caption); color: var(--danger); min-height: 16px; }
 
   /* ── MODAL (sheet on mobile) ─────────────────── */
   .modal-overlay {
@@ -1082,8 +1091,8 @@
     overflow-y: auto;
     box-shadow: var(--shadow-2);
   }
-  .modal h2 { font-family: var(--sans); font-size: 20px; letter-spacing: -0.01em; margin-bottom: var(--s2); font-weight: 600; }
-  .modal p { color: var(--text-dim); font-size: 13px; margin-bottom: 16px; line-height: 1.6; }
+  .modal h2 { font-family: var(--sans); font-size: var(--t-lead); letter-spacing: -0.01em; margin-bottom: var(--s2); font-weight: 600; }
+  .modal p { color: var(--text-dim); font-size: var(--t-caption); margin-bottom: 16px; line-height: 1.6; }
   .modal textarea {
     width: 100%;
     min-height: 220px;
@@ -1093,7 +1102,7 @@
     padding: 13px;
     color: var(--text);
     font-family: var(--mono);
-    font-size: 13px;
+    font-size: var(--t-caption);
     outline: none;
     resize: vertical;
     transition: box-shadow 0.15s;
@@ -1139,7 +1148,7 @@
     font-weight: 600;
   }
   .perf-meta {
-    font-size: 13px;
+    font-size: var(--t-caption);
     color: var(--text-dim);
     margin-top: 5px;
   }
@@ -1149,7 +1158,7 @@
     border: none;
     border-radius: 9px;
     padding: 8px 13px;
-    font-size: 13px;
+    font-size: var(--t-caption);
     color: var(--text-dim);
     cursor: pointer;
     min-height: 36px;
@@ -1216,7 +1225,7 @@
   .perf-edit-col.lyrics { flex: 3; }
   .perf-edit-col.notes { flex: 2; }
   .perf-edit-col label {
-    font-size: 11px;
+    font-size: var(--t-micro);
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--text-faint);
@@ -1232,7 +1241,7 @@
     padding: 14px;
     color: var(--text);
     font-family: var(--mono);
-    font-size: 13px;
+    font-size: var(--t-caption);
     line-height: 1.8;
     outline: none;
     resize: none;
@@ -1242,7 +1251,7 @@
   .perf-edit-col.lyrics textarea { color: var(--text-dim); }
   .perf-edit-col.notes textarea { color: var(--gold); font-weight: 700; }
   .perf-edit-help {
-    font-size: 12.5px;
+    font-size: var(--t-caption);
     color: var(--text-faint);
     margin: 12px 0 16px;
     line-height: 1.6;
@@ -1268,7 +1277,7 @@
     color: var(--text);
     padding: 12px 24px;
     border-radius: 999px;
-    font-size: 13px;
+    font-size: var(--t-caption);
     font-weight: 500;
     opacity: 0;
     pointer-events: none;
@@ -1313,13 +1322,13 @@
 
     .detail { padding-top: var(--topbar-h); }
     .detail-inner { padding: 34px 18px 70px; }
-    .detail-title { font-size: 28px; }
+    .detail-title { font-size: var(--t-h2); }
     .detail-head { flex-direction: column; gap: 12px; }
     .detail-actions { padding-top: 0; width: 100%; }
     .detail-actions .icon-btn { flex: 1; min-height: 44px; }
 
     .spec { padding: 11px 10px; }
-    .spec .v { font-size: 12px; }
+    .spec .v { font-size: var(--t-caption); }
 
     .album-header { flex-direction: column; }
     .album-header .cover-img { max-width: 100%; }
@@ -1329,7 +1338,7 @@
     .lyric-head { flex-direction: column; align-items: flex-start; gap: 10px; }
     .lyric-actions { width: 100%; }
     .lyric-actions .mini-btn { flex: 1; min-height: 42px; }
-    .lyrics { font-size: 15.5px; }
+    .lyrics { font-size: var(--t-body); }
 
     .cover-img { max-height: 300px; }
     .suno-block { padding-right: 19px; padding-top: 46px; }
@@ -1339,10 +1348,10 @@
 
     .home { padding: 28px 18px 70px; }
     .home-logo { width: 66px; height: 66px; }
-    .home-title { font-size: 23px; }
+    .home-title { font-size: var(--t-h3); }
     .home-stats { gap: 9px; }
     .stat-card { padding: 14px 8px; }
-    .stat-num { font-size: 25px; }
+    .stat-num { font-size: var(--t-h3); }
     .home-new { width: 100%; }
 
     /* iOS bottom sheet modals */
