@@ -161,7 +161,14 @@ Sidebar se na telefonu ne izvlači kao meni. Lista je sopstveni ekran, detalj je
 
 ### Plutajuće trake
 
-Glavna traka je kapsula: `left: 16px`, `bottom: 30px`, širina `calc(100% - 32px)`, visina 56px, pozadina `--bg-elev`, radijus `--r-lg`, ivica 1px sa gornjom u `rgba(201,168,106,0.2)`.
+Glavna traka je kapsula: `left: 16px`, širina `calc(100% - 32px)`, visina 56px, pozadina `--bg-elev`, ivica 1px sa gornjom u `rgba(201,168,106,0.2)`.
+
+**Ažurirano na Apple/iOS 26 vrednosti** (vidi "Odluke" na kraju): `bottom:
+env(safe-area-inset-bottom)` (bez dodatne margine — safe-area inset sam po
+sebi je razmak), `border-radius: 28px` (van postojeće skale radijusa, upisano
+direktno). Isti tretman na `.perf-jump` u Perform prikazu. Prvobitna
+vrednost `bottom: 30px` i `radius: --r-lg` (16px) iz ovog pasusa više ne
+važe.
 
 Sadržaj klizi ispod nje. Iznad trake ide prelaz visine 130px iz `--bg` u providno, da tekst bledi umesto da se seče.
 
@@ -275,13 +282,19 @@ Dugmad Save, Cancel i Reset from lyrics ostaju, gore desno, sa vremenom poslednj
 
 ### Pretraga kroz tekstove
 
-Najvažnija stavka u ovoj fazi. Pretraga sada traži po naslovu; proširi je na `lyrics` svih pesama.
+**Urađeno:** pretraga (`renderSidebar()`) sad traži i po `lyrics`, ne samo po
+naslovu — haystack je `[title, lyrics, album, genre, analysis, instruments]`.
+Ovim dobijaš proveru ponavljanja kroz katalog: ukucaš sliku koju si upravo
+napisao i vidiš da li je već korišćena.
 
-Kad upit da pogodak u tekstu a ne u naslovu, red u listi ispod naziva prikazuje isečak stiha sa istaknutim pojmom, umesto uobičajenih meta podataka.
+**Nije urađeno:** kad upit pogodi u tekstu a ne u naslovu, red u listi i
+dalje prikazuje uobičajene meta podatke (žanr/tonalitet/BPM), ne isečak
+stiha sa istaknutim pojmom kako je prvobitno traženo. Ostaje za kasnije ako
+je i dalje potrebno.
 
-Ovim dobijaš proveru ponavljanja kroz katalog: ukucaš sliku koju si upravo napisao i vidiš da li je već koristio.
+### Prečice na desktopu — nije rađeno
 
-### Prečice na desktopu
+Ni jedna od ovih ne postoji u kodu:
 
 | Taster | Radnja |
 | --- | --- |
@@ -293,19 +306,27 @@ Ovim dobijaš proveru ponavljanja kroz katalog: ukucaš sliku koju si upravo nap
 
 Brzi skok je preklapajuće polje na sredini ekrana sa listom rezultata ispod, radijus `--r-lg`.
 
-### Prazna stanja
+(Postoje `Cmd/Ctrl+S` za snimanje i `Cmd/Ctrl+N` za novu pesmu dok se uređuje
+— to je starija prečica iz koda pre redizajna, ne stavka iz ove faze.)
+
+### Prazna stanja — nije rađeno
 
 Kad pretraga ne nađe ništa, umesto poruke ponudi dugme koje pravi novu pesmu sa upisanim nazivom.
 
 Kad album nema pesama, ponudi dugme za dodavanje u taj album.
 
-### Gustina liste
+I dalje se prikazuje samo tekstualna poruka ("No songs yet." / "No matches."), bez dugmeta.
+
+### Gustina liste — nije rađeno
 
 Prekidač u zaglavlju sidebar-a prebacuje između dva reda po pesmi i jednog kompaktnog. Stanje se pamti.
 
-### Mikrointerakcije
+### Mikrointerakcije — nije rađeno
 
 Promena statusa menja boju vertikalne crtice kroz prelaz od 150ms. Bez drugih animacija.
+
+Ove četiri stavke (prečice, prazna stanja, gustina liste, mikrointerakcije)
+nisu rađene i za sada se ne rade.
 
 ## Provera pre spajanja
 
@@ -339,22 +360,38 @@ Faze 0 do 3 su mehaničke i mogu brzo. Faze 4 do 7 traže odluke — posle svake
 
 ## Stanje
 
-*(ažurirano posle spajanja u `main`.)*
+*(ažurirano 2026-09-20.)*
 
 ### Šta je pushovano
 
-Faze 0–6 su spojene u `main` (merge commit `369048d`), plus dva prateća commit-a:
+Faze 0–6 su spojene u `main` (merge commit `369048d`), plus prateći commit-i:
 
 - `569a149` — kontrast svetlog režima (vidi "Odluke" ispod)
 - `11f6b1e` — ispravka četiri mobilna bag-a nađena posle spajanja: `--clearance`
   nedovoljan, `.sidebar-foot` se i dalje renderovao ispod trake, Perform kolona
   bežala van ekrana na telefonu (otud tri praga u Fazi 6)
+- `8083d3f` — traka za skok na sekciju u Perform prikazu prati aktivnu
+  sekciju preko `IntersectionObserver` (ispravljena trka pri simultanim
+  entry-jima) i sama se pomera kad aktivno dugme izađe iz vidljivog dela
+  trake; plutajuća traka spuštena na `bottom: calc(12px + safe-area)`
+  (kasnije dalje ispravljeno, vidi sledeću stavku); emodži ikonice (🔍 📋
+  ☀ ☾) zamenjene SVG-om
+- `c499c75` — plutajuća traka i Perform traka na tačnim Apple/iOS 26
+  vrednostima: `bottom: env(safe-area-inset-bottom)` (bez dodatne margine),
+  bočna margina 16px, radijus 28px; `--clearance` i `.perf-inner` padding
+  preračunati
 
 Tačka povratka na stanje pre redizajna: tag `pre-redesign` na `main`-u.
 
-**Faza 7 (funkcionalni dodaci) nije rađena** — pretraga kroz tekstove, prečice
-na desktopu, prazna stanja, gustina liste, mikrointerakcije statusne crtice.
-Ostaje za sledeću sesiju ako je i dalje u planu.
+**Faza 7 (funkcionalni dodaci): samo pretraga kroz tekstove je urađena**
+(pretraga sad filtrira i po `lyrics`, ne samo po naslovu — vidi Faza 7 gore).
+Isečak stiha sa istaknutim pojmom u rezultatima, prečice na desktopu, prazna
+stanja sa dugmetom, gustina liste i mikrointerakcije statusne crtice **nisu
+rađene i za sada se ne rade**.
+
+**Otvoreno, van faza:** `box-shadow: var(--shadow-2)` je i dalje na obe
+plutajuće trake — ako "bez senke" treba da važi kao deo Apple vrednosti,
+ovo čeka ukljanjanje u kodu (vidi "Odluke").
 
 ### Šta ostaje za testiranje uživo
 
@@ -419,6 +456,23 @@ Perform) na stvarnom telefonu, ne samo u simuliranom viewport-u.
     `calc(70px + env(safe-area-inset-bottom))` (bilo 80px).
   Ova izmena je pushovana bez uživo testiranja u browseru — vlasnik testira
   direktno na telefonu i doneo je Apple vrednosti odatle.
+
+  **Nije urađeno:** `box-shadow: var(--shadow-2)` je i dalje na obe trake
+  (`.mobile-bar` i `.perf-jump`) u `styles.css`. Ako je "bez senke" deo istih
+  Apple vrednosti (pomenuto naknadno), ovo ostaje da se ukloni — nije
+  uklonjeno u kodu, samo je ovaj dokument ranije to prevideo.
+- **Emodži → SVG ikonice** (van prvobitnog brief-a): lupa za pretragu u
+  plutajućoj traci, clipboard za "Copy lyrics" u redu pesme i sunce/mesec za
+  prekidač teme su bili sistemski emodži (🔍 📋 ☀ ☾) — u boji, sa senkom na
+  iOS, upadali iz dizajna. Zamenjeni inline SVG ikonicama u
+  `index.html` (konstante `ICON_SEARCH`, `ICON_COPY`, `ICON_SUN`,
+  `ICON_MOON` blizu vrha JS-a): `stroke="currentColor"`,
+  `stroke-width="1.6"`, `fill="none"`, `stroke-linecap="round"`, 18×18.
+  Boja dolazi iz postojećeg CSS-a dugmeta (`--text-dim` / `--text` na
+  hover-u), nije trebalo dodatno stilizovanje. Nije dirano: strelice za
+  reorder albuma, strelice za sidebar collapse, muzička nota za Perform, X
+  za zatvaranje, kružna strelica za promenu statusa, tri tačke za "more"
+  meni — to su obični tipografski simboli, ne emodži u boji.
 - **`--gold-text`** (Provera pre spajanja): nova promenljiva, definisana samo
   u `body.light` kao `#7e6534`, korišćena isključivo tamo gde je `--gold`
   sitan čitljiv tekst (section-label, perf-label, detail-track-num, bedževi,
