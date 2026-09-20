@@ -397,6 +397,28 @@ Perform) na stvarnom telefonu, ne samo u simuliranom viewport-u.
   bottom 12px, visina 54px, `.perf-inner` padding-bottom 80px (razmak iznad
   trake ~14px). Na uređaju sa sigurnosnom zonom (npr. 34px) oba razmaka rastu
   za tu vrednost jer je ona u istoj `calc()` na obe strane.
+- **Traka na pravim Apple/iOS 26 vrednostima** (posle prethodne ispravke):
+  vlasnik je izmerio uživo na telefonu i doneo tačne Apple vrednosti za
+  plutajuću traku — donja margina ispod trake je 0 (safe-area inset JESTE
+  razmak, ništa se ne dodaje povrh), bočna margina 16px, radijus 28px.
+  Promenjeno na sva tri mesta (lista, detalj — oba kroz `.mobile-bar` — i
+  Perform kroz `.perf-jump`):
+  - `bottom: calc(12px + env(safe-area-inset-bottom))` → `bottom:
+    env(safe-area-inset-bottom)` na obe trake.
+  - `.mobile-bar` bočna margina je već bila 16px (`left: 16px`, `width:
+    calc(100% - 32px)`) — nije trebalo menjati. `.perf-jump` je imao
+    `max-width: calc(100% - 48px)` (24px margina), promenjeno na
+    `calc(100% - 32px)` (16px) da odgovara.
+  - `border-radius` obe trake sa `var(--r-lg)` (16px) na `28px` (van
+    postojeće skale radijusa — Apple-ova vrednost za ovu traku, ne uklapa se
+    u `--r-sm/md/lg/full`, pa je upisana direktno, ne kao nova promenljiva).
+  - `--clearance`: otisak trake sad je samo `visina(56px) + 16px vazduha`
+    (bottom više ne dodaje 12px pošto ga je safe-area već pokrila) =
+    `calc(72px + env(safe-area-inset-bottom))` (bilo 84px).
+  - `.perf-inner` donji padding: `visina(54px) + 16px vazduha` =
+    `calc(70px + env(safe-area-inset-bottom))` (bilo 80px).
+  Ova izmena je pushovana bez uživo testiranja u browseru — vlasnik testira
+  direktno na telefonu i doneo je Apple vrednosti odatle.
 - **`--gold-text`** (Provera pre spajanja): nova promenljiva, definisana samo
   u `body.light` kao `#7e6534`, korišćena isključivo tamo gde je `--gold`
   sitan čitljiv tekst (section-label, perf-label, detail-track-num, bedževi,

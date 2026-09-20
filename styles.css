@@ -1174,9 +1174,9 @@
   .perf-inner {
     max-width: 920px;
     margin: 0 auto;
-    /* Bar footprint is bottom(12px + safe-area) + height(52px) + a 16px gap,
+    /* Bar footprint is bottom(safe-area only) + height(54px) + a 16px gap,
        so content has to clear more than the bar's own height. */
-    padding: var(--s5) var(--s5) calc(80px + env(safe-area-inset-bottom));
+    padding: var(--s5) var(--s5) calc(70px + env(safe-area-inset-bottom));
     padding-top: calc(26px + env(safe-area-inset-top));
   }
   .perf-head {
@@ -1306,16 +1306,16 @@
   .perf-jump {
     position: fixed;
     left: 50%;
-    bottom: calc(12px + env(safe-area-inset-bottom));
+    bottom: env(safe-area-inset-bottom);
     transform: translateX(-50%);
-    max-width: calc(100% - 48px);
+    max-width: calc(100% - 32px);
     display: flex;
     gap: var(--s1);
     overflow-x: auto;
     background: var(--bg-elev);
     border: 1px solid rgba(236, 232, 225, 0.07);
     border-top-color: rgba(201, 168, 106, 0.2);
-    border-radius: var(--r-lg);
+    border-radius: 28px;
     padding: var(--s1);
     box-shadow: var(--shadow-2);
     z-index: 10;
@@ -1410,9 +1410,10 @@
 
   /* ── MOBILE ─────────────────────────────────── */
   @media (max-width: 760px) {
-    /* Bar footprint is bottom(12px + safe-area) + height(56px) + a gap,
-       so content has to clear more than the bar's own height. */
-    :root { --clearance: calc(84px + env(safe-area-inset-bottom)); }
+    /* Bar footprint is bottom(safe-area only, no added margin) +
+       height(56px) + a 16px gap, so content has to clear more than the
+       bar's own height. */
+    :root { --clearance: calc(72px + env(safe-area-inset-bottom)); }
     .app { grid-template-columns: 1fr; }
     .song-item { min-height: 62px; }
 
@@ -1500,7 +1501,7 @@
       display: none;
       position: fixed;
       left: 16px;
-      bottom: calc(12px + env(safe-area-inset-bottom));
+      bottom: env(safe-area-inset-bottom);
       width: calc(100% - 32px);
       height: 56px;
       z-index: 45;
@@ -1508,7 +1509,7 @@
       gap: var(--s2);
       padding: 0 var(--s2);
       background: var(--bg-elev);
-      border-radius: var(--r-lg);
+      border-radius: 28px;
       border: 1px solid rgba(236, 232, 225, 0.07);
       border-top-color: rgba(201, 168, 106, 0.2);
       box-shadow: var(--shadow-2);
