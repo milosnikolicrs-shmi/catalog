@@ -9,6 +9,7 @@
     --text-dim: #928b7d;
     --text-faint: #5f5a50;
     --gold: #c9a86a;
+    --gold-text: var(--gold);
     --gold-soft: #8a744a;
     --gold-tint: rgba(201, 168, 106, 0.14);
     --gold-glow: rgba(201, 168, 106, 0.16);
@@ -72,8 +73,9 @@
     --text: #211d16;
     --text-read: #2f2a21;
     --text-dim: #6f6a5c;
-    --text-faint: #a29b8b;
+    --text-faint: #6e6858;
     --gold: #96783e;
+    --gold-text: #7e6534;
     --gold-soft: #b0925a;
     --gold-tint: rgba(150, 120, 62, 0.13);
     --gold-glow: rgba(150, 120, 62, 0.18);
@@ -383,7 +385,7 @@
     font-weight: 600;
   }
   button.album-label { cursor: pointer; }
-  button.album-label:active { color: var(--gold); }
+  button.album-label:active { color: var(--gold-text); }
 
   /* Swipe-reveal actions (mobile only, see the 760px block); on desktop
      the same two actions are reachable through the row's right-click menu. */
@@ -551,7 +553,7 @@
     gap: var(--s1);
     background: none;
     border: none;
-    color: var(--gold);
+    color: var(--gold-text);
     font-size: var(--t-body);
     cursor: pointer;
     padding: var(--s1) 0;
@@ -573,7 +575,7 @@
     font-size: var(--t-micro);
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--gold);
+    color: var(--gold-text);
     margin-bottom: var(--s1);
     font-variant-numeric: tabular-nums;
   }
@@ -611,7 +613,7 @@
     background: var(--bg-elev);
     text-transform: uppercase;
   }
-  .badge.vocal { background: var(--gold-tint); color: var(--gold); }
+  .badge.vocal { background: var(--gold-tint); color: var(--gold-text); }
   .badge.status-final { background: color-mix(in srgb, var(--final) 16%, transparent); color: var(--final); }
   .badge.status-draft { background: var(--bg-elev); color: var(--text-dim); }
   .badge.status-production { background: var(--gold-tint); color: var(--prod); }
@@ -659,7 +661,7 @@
     font-size: var(--t-caption);
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--gold);
+    color: var(--gold-text);
     margin-bottom: var(--s3);
     font-weight: 600;
   }
@@ -709,7 +711,7 @@
     margin: 0 auto;
   }
   .lyrics .tag {
-    color: var(--gold);
+    color: var(--gold-text);
     font-family: var(--mono);
     font-size: var(--t-micro);
     letter-spacing: 0.14em;
@@ -932,7 +934,7 @@
     font-size: var(--t-caption);
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--gold);
+    color: var(--gold-text);
     margin-bottom: var(--s3);
     margin-top: var(--s5);
     font-weight: 600;
@@ -1227,7 +1229,7 @@
     font-weight: 600;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: var(--gold);
+    color: var(--gold-text);
   }
   .perf-hint {
     display: inline;
@@ -1327,7 +1329,7 @@
     font-variant-numeric: tabular-nums;
   }
   .perf-edit-row.section .perf-edit-lyric {
-    color: var(--gold);
+    color: var(--gold-text);
     font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -1441,9 +1443,19 @@
     }
     .gate-box { padding: var(--s6) var(--s5); }
 
-    /* Inputs under 16px make Safari zoom the page on focus. */
+    /* Inputs under 16px make Safari zoom the page on focus. Repeated here
+       for .mono-area/.modal textarea/.perf-edit-note because each already
+       carries its own more specific font-size rule that would otherwise
+       win over the generic .field input/textarea/select one above. */
     .field input, .field textarea, .field select,
-    .search-wrap input, .gate-input { font-size: 16px; }
+    .search-wrap input, .gate-input,
+    .field textarea.mono-area, .modal textarea, .perf-edit-note { font-size: 16px; }
+
+    /* Touch targets under 44px: some elements already had a mobile
+       override (.song-item, .detail-actions .icon-btn, .lyric-actions
+       .mini-btn, .ai-btn) -- these are the ones that didn't. */
+    .seg button, .field .seg button, .btn, .stream-link, .mini-btn,
+    .audio-placeholder button, .perf-btn { min-height: 44px; }
 
     /* ── FLOATING BAR (List and Detail screens) ── */
     .mobile-bar {
