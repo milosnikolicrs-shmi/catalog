@@ -202,7 +202,27 @@ Izmene:
 - gore desno: A−, A+, prekidač komentara, svetli režim, zatvori
 - pozadina `#0a0908`, tamnija od ostatka aplikacije
 
-Ukloni mobilnu verziju Perform ekrana. Peva se pred ekranom na stalku.
+**Ispravka:** Perform se koristi podjednako na telefonu, iPadu i desktopu —
+prvobitna rečenica "ukloni mobilnu verziju" je bila pogrešna i nije važila.
+Umesto jednog fiksnog rasporeda, tri praga:
+
+- **do 600px (telefon):** tekst 21px, prored 1.5. Kolona teksta
+  `max-width: 100%` sa bočnim paddingom 24px (`--s5`, već je bio podrazumevani
+  padding `.perf-inner`-a, nije trebalo posebno podešavanje). Komentar nije u
+  margini nego blok ispod strofe: pozadina `--bg-panel`, radijus `--r-md`,
+  zlatna vertikalna linija 2px sa leve strane, tekst kurziv `--t-caption` u
+  `--text-dim` (crtica 16×2px iznad komentara se ne koristi u ovom prikazu).
+  Traka za skok na sekciju se horizontalno skroluje (`overflow-x: auto`).
+- **600–900px (iPad uspravno):** isto kao telefon (blok-komentar, skrolujuća
+  traka), samo tekst 24px i bočni padding 40px.
+- **preko 900px (iPad položeno, desktop):** dve kolone kao ranije opisano —
+  tekst levo, komentari u desnoj margini sa zlatnom crticom iznad — ali
+  kolona teksta je `max-width: 660px` (`flex: 1 1 auto`), ne fiksnih
+  `flex: 0 0 660px`, da se suži umesto da prelije kad je glavna kolona uža
+  od 660px.
+
+Prelaz između 600px i 900px, i između 900px i preko, mora da bude čist kad
+se iPad rotira iz uspravnog u položeni položaj — proveri oba pravca.
 
 ### Editor komentara
 
@@ -288,3 +308,63 @@ Prag je 4.5:1 za tekst do 24px, 3:1 iznad. Gde ne prolazi, potamni boju teksta u
 ### Redosled
 
 Faze 0 do 3 su mehaničke i mogu brzo. Faze 4 do 7 traže odluke — posle svake mi javi šta si uradio pre nego što nastaviš.
+
+## Stanje
+
+*(ažurirano posle spajanja u `main`.)*
+
+### Šta je pushovano
+
+Faze 0–6 su spojene u `main` (merge commit `369048d`), plus dva prateća commit-a:
+
+- `569a149` — kontrast svetlog režima (vidi "Odluke" ispod)
+- `11f6b1e` — ispravka četiri mobilna bag-a nađena posle spajanja: `--clearance`
+  nedovoljan, `.sidebar-foot` se i dalje renderovao ispod trake, Perform kolona
+  bežala van ekrana na telefonu (otud tri praga u Fazi 6)
+
+Tačka povratka na stanje pre redizajna: tag `pre-redesign` na `main`-u.
+
+**Faza 7 (funkcionalni dodaci) nije rađena** — pretraga kroz tekstove, prečice
+na desktopu, prazna stanja, gustina liste, mikrointerakcije statusne crtice.
+Ostaje za sledeću sesiju ako je i dalje u planu.
+
+### Šta ostaje za testiranje uživo
+
+Sledeće nisam mogao da proverim bez pristupa Firestore/Firebase Auth, pa je
+neprovereno kroz kod, ne uživo:
+
+- uvoz i izvoz kataloga (Export → kopiraj JSON → Import istog teksta)
+- Perform čita postojeći `perfSheet` zapis bez izmene (otvori pesmu koja već
+  ima sačuvane performance beleške)
+- prijava i odjava
+- PWA instalacija na pravom HTTPS URL-u (manifest/ikonice nisu dirani, ali
+  install-prompt ponašanje treba proveriti na živom sajtu)
+
+Preporuka: posle poslednje ispravke (Perform pragovi, `--clearance`,
+`.sidebar-foot`) vredi još jednom proći sva tri mobilna ekrana (lista, detalj,
+Perform) na stvarnom telefonu, ne samo u simuliranom viewport-u.
+
+### Odluke donete usput, van prvobitnog brief-a
+
+- **`--clearance`** (Faza 2): uvedena kao placeholder (90px desktop / 70px
+  mobilni) za prostor koji će zauzeti plutajuća traka iz Faze 5. Kad je traka
+  stvarno napravljena, mobilna vrednost od 70px se pokazala nedovoljnom —
+  stvarni otisak trake je `bottom(30px) + visina(56px)` ≈ 86px plus sigurnosna
+  zona uređaja. Ispravljeno na `calc(102px + env(safe-area-inset-bottom))`.
+- **`--gold-text`** (Provera pre spajanja): nova promenljiva, definisana samo
+  u `body.light` kao `#7e6534`, korišćena isključivo tamo gde je `--gold`
+  sitan čitljiv tekst (section-label, perf-label, detail-track-num, bedževi,
+  `.tag`, itd.). Sama `--gold` ostaje `#96783e` netaknuta za pozadine dugmadi,
+  ivice i akcente, jer tamo kontrast teksta nije relevantan. `--text-faint` je
+  potamnjen na `#6e6858` (bio ispod praga svuda). `--draft`/`--prod`/`--ok`/
+  `--final` i `--text-dim` su namerno ostavljeni — prva četiri su statusna
+  grafika sa pragom 3:1 koji već prolazi, `--text-dim` je promašio prag za
+  manje od pola procenta, ispod granice vidljive razlike.
+- **Perform, tri praga** (Faza 6): prvobitno uputstvo "ukloni mobilnu verziju"
+  je bilo pogrešno — Perform se koristi na telefonu i iPadu, ne samo na
+  desktopu. Tačne vrednosti sad pišu direktno u Fazi 6 iznad.
+- **`.sidebar-foot { display: none }` ispod 760px** (ispravka posle Faze 5):
+  Faza 5 je uvela plutajuću traku sa "..." menijem kao zamenu za stari
+  sidebar-foot (+ New song/Import/Export/tema/odjava), ali sama Faza 5 nije
+  eksplicitno tražila da se sidebar-foot sakrije — samo da traka postoji.
+  Posledica: oba su se prikazivala istovremeno na mobilnom. Dodato naknadno.
