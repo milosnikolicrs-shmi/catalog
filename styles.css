@@ -1174,7 +1174,7 @@
   .perf-inner {
     max-width: 920px;
     margin: 0 auto;
-    padding: var(--s5) var(--s5) 100px;
+    padding: var(--s5) var(--s5) calc(100px + env(safe-area-inset-bottom));
     padding-top: calc(26px + env(safe-area-inset-top));
   }
   .perf-head {
@@ -1242,11 +1242,14 @@
     margin-left: var(--s2);
   }
 
-  /* ── LINES: 660px text column, comments in the right margin ── */
+  /* ── LINES: text column up to 660px, comments in the right margin.
+     This is the >900px (iPad landscape / desktop) layout; the two
+     media queries below adapt it for phone and iPad-portrait, where
+     Perform is used just as much as on desktop. ── */
   .perf-lines { display: flex; flex-direction: column; gap: var(--s4); }
   .perf-line { display: flex; gap: var(--s5); align-items: flex-start; }
   .perf-lyric {
-    flex: 0 0 660px;
+    flex: 1 1 auto;
     max-width: 660px;
     font-size: calc(27px * var(--perf-scale, 1));
     line-height: 1.45;
@@ -1270,6 +1273,32 @@
     margin-bottom: var(--s2);
   }
   .perf-inner.notes-hidden .perf-note { display: none; }
+
+  /* ── PHONE + IPAD PORTRAIT (<=900px): comments become a block below
+     the line instead of a right-margin column, since there's no room
+     for a margin. Font size/padding differ between the two below. ── */
+  @media (max-width: 900px) {
+    .perf-line { flex-direction: column; align-items: stretch; gap: var(--s2); }
+    .perf-lyric { max-width: 100%; }
+    .perf-note {
+      background: var(--bg-panel);
+      border-radius: var(--r-md);
+      border-left: 2px solid var(--gold);
+      padding: var(--s2) var(--s3);
+    }
+    .perf-note::before { display: none; }
+    .perf-jump { -webkit-overflow-scrolling: touch; }
+  }
+  /* iPad portrait */
+  @media (min-width: 601px) and (max-width: 900px) {
+    .perf-inner { padding-left: 40px; padding-right: 40px; }
+    .perf-lyric { font-size: calc(24px * var(--perf-scale, 1)); line-height: 1.5; }
+  }
+  /* Phone -- .perf-inner's base padding is already --s5 (24px), so only
+     the font size needs overriding here. */
+  @media (max-width: 600px) {
+    .perf-lyric { font-size: calc(21px * var(--perf-scale, 1)); line-height: 1.5; }
+  }
 
   /* ── JUMP-TO-SECTION FLOATING BAR ── */
   .perf-jump {
@@ -1379,7 +1408,9 @@
 
   /* ── MOBILE ─────────────────────────────────── */
   @media (max-width: 760px) {
-    :root { --clearance: 70px; }
+    /* Bar footprint is bottom(30px + safe-area) + height(56px) + a gap,
+       so content has to clear more than the bar's own height. */
+    :root { --clearance: calc(102px + env(safe-area-inset-bottom)); }
     .app { grid-template-columns: 1fr; }
     .song-item { min-height: 62px; }
 
@@ -1388,6 +1419,11 @@
     .sidebar { padding-top: env(safe-area-inset-top); }
     body.mobile-detail .sidebar { display: none; }
     body:not(.mobile-detail) .detail { display: none; }
+
+    /* The old sidebar drawer footer (+New song/Import/Export/theme/Sign
+       out) is replaced by the floating bar and its "..." menu. */
+    .sidebar-foot { display: none; }
+    .song-list { padding-bottom: var(--clearance); }
 
     .detail-inner { padding: calc(var(--s6) + env(safe-area-inset-top)) var(--s4) var(--clearance); }
     .detail-title { font-size: var(--t-h2); }
