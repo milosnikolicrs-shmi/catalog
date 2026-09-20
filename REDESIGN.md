@@ -147,9 +147,29 @@ Sekcija je dugme visine 30px sa nazivom levo i strelicom desno, unutar kartice s
 
 Ograniči širinu kolone teksta na `max-width: 480px` i na desktopu, iako ima mesta. Prored 1.7. Oznake sekcija `[Verse 1]` idu na `--t-micro` u `--gold`, iznad strofe.
 
+**Dopuna (posle spajanja):** `max-width:480px` je bio na mestu otkad je ova
+faza urađena — proveren merenjem, nikad nije popuštao (potvrđeno 480px na
+1400px ekranu). Ono što JESTE bilo premalo je sam font: `--t-body` (15px) na
+desktopu. Dodata `--t-lyric: 19px` u `:root`, primenjena samo iznad 900px
+(`@media (min-width: 901px) { .lyrics { font-size: var(--t-lyric); } }`),
+prored ostaje 1.7 (`line-height` se ne menja, samo `font-size`). Ispod 900px
+ostaje kako je bilo (15px do 760px, pa 21px ispod 600px iz Faze 5).
+
 ### Raspored
 
 Mreža od pet kolona: tekst zauzima tri, desna kolona dve.
+
+**Dopuna:** omot pesme (`.cover-img`) ograničen na `max-height: 380px` —
+previsok za deo teksta ispod. Smanjen na `max-height: 320px`. Kartice BPM /
+Key / Duration / Genre (`.specs`) su bile `repeat(3, 1fr)` na svim
+širinama, što je ostavljalo Genre samu u drugom redu i prazan prostor
+desno od nje na širokom ekranu. Dodato `@media (min-width: 901px) { .specs
+{ grid-template-columns: repeat(4, 1fr); } }` — sve četiri u jedan red
+iznad 900px, ispod ostaje `repeat(3, 1fr)` (vidi Faza 5 za mobilnu
+ispravku visine kartica). Oba pravila su namerno upisana POSLE osnovnih
+`.lyrics`/`.specs` pravila u fajlu — ista specifičnost, kasniji redosled u
+izvoru pobeđuje, bez obzira na media-query poklapanje, pa medijski upit
+mora doći posle da bi uopšte radio.
 
 ## Faza 5 — mobilni prikaz
 
@@ -179,6 +199,45 @@ Ne koristi providnost ni zamućenje. Na skoro crnoj podlozi staklo daje mutnu si
 Tabovi umesto svih polja odjednom: Lyrics, Production, Prompt, More. Lyrics je podrazumevan. Visina taba 44px.
 
 Tekst pesme na `21px`, prored 1.5.
+
+**Dopuna (posle spajanja) — dupla dugmad:** vrh ekrana (`.detail-actions`:
+Perform/Edit/Delete) i sadržaj (`.lyric-actions`: Copy lyrics/Print lyrics)
+su i dalje bili puni desktop dugmadi na mobilnom, POVRH plutajuće trake
+(Copy lyrics/Edit/⋮) i "..." menija (koji već ima Perform/Print
+lyrics/Delete) — skoro svaka radnja se pojavljivala dvaput ili triput.
+Ispravljeno u mobilnoj medijskoj upitu:
+
+- `.detail-actions .icon-btn:not(:first-child) { display: none; }` — gore
+  ostaje samo Perform (prvo dugme u markup-u); Edit i Delete su već
+  dostupni preko trake (Edit) i "..." menija (Delete).
+- `.lyric-actions { display: none; }` — Copy lyrics je već u traci, Print
+  lyrics je već u "..." meniju; ceo red u sadržaju je bio višak.
+
+Ništa nije dodato u "..." meni — sve što se uklonilo iz sadržaja već je
+imalo svoje mesto u traci ili meniju.
+
+**Dopuna — omot odsečen na dnu:** `.cover-img` na mobilnom
+(`max-height:300px`) je koristio `object-fit: cover` nasleđeno iz osnovnog
+pravila — kad je omot uspravniji (portret) od okvira kog `max-height`
+pravi (širina 100% × 300px, dakle širi format), `cover` seče vrh i dno da
+popuni okvir, uključujući natpis blizu dna slike. Prvi pokušaj
+(`object-fit: contain`) je rešio sečenje ali ostavljao prazne trake sa
+strane kad odnos stranica ne odgovara. Pošto su omoti kvadratni, ispravan
+fix je `aspect-ratio: 1 / 1` (bez `max-height`) uz `object-fit: cover`
+vraćen nazad — okvir je uvek kvadrat pa `cover` nema šta da seče kad je i
+slika kvadratna. Testirano sa kvadratnom test-slikom (500×500, oznake na
+sve četiri ivice) na 390px: box tačno 358×358 (širina sadržaja), sve četiri
+ivice vidljive, nema praznih traka. Ovo pravilo važi samo na mobilnom —
+desktop `.cover-img` (van medijskog upita, `max-height:320px`) ostaje
+namerno "bannner" krupni kadar, ne kvadrat.
+
+**Dopuna — Genre kartica lomi visinu:** `.spec` kartice na mobilnom nisu
+imale zajedničku visinu, pa je Genre (duži tekst) padala u tri reda dok su
+BPM/Key/Duration ostajale u jednom, praveći neujednačen red kartica.
+Dodato `.spec { min-height: 64px; }` (izjednačava kratke kartice) i na
+`.spec .v` `-webkit-line-clamp: 2` (ograničava dužu vrednost na dva reda sa
+`…`, umesto tri). Izmereno: BPM/Key/Duration 64px, Genre 73px (blago viša
+zbog dva reda teksta, ali vizuelno poravnato, ne tri reda kao ranije).
 
 ### Gestovi
 
@@ -258,6 +317,24 @@ Testirano skrolovanjem kroz celu pesmu (deset sekcija, uključujući kratak
 Intro i Outro) na 390px širine: aktivno dugme ide redom 0→1→2→...→N bez
 preskakanja i bez vraćanja na pogrešnu sekciju, traka se pomera da prati
 aktivno dugme. Kod: `index.html`, `setupPerfJumpObserver()`.
+
+### Razmak oznake sekcije (i mobilni i desktop)
+
+Oznaka sekcije (`[VERSE 2]`) je imala skoro isti razmak iznad i ispod —
+`.perf-section { padding: var(--s5) 0; }` (24px gore i dole simetrično) plus
+razmak iz flex `gap` (`--s3`, 12px) između oznake i prve linije — pa je
+ukupan razmak IZNAD oznake (24px prethodne sekcije + 1px ivica + 24px ove
+sekcije ≈ 49px) izgledao vizuelno slično razmaku ISPOD (12px), zbog velikog
+`line-height`-a strofe iznad koji "guta" deo praznine.
+
+Promenjeno na `padding: var(--s2) 0 var(--s5)` (8px gore, 24px dole — oba
+postojeći `--s` tokeni, ne nova magična vrednost). Razmak ispod ostaje
+nepromenjen (već je bio ispravan). Izmereno (1400px ekran, realan
+`.perf-lyric` sa `line-height: 1.45`): razmak iznad 52px → **36px**, razmak
+ispod ostaje **13px** — traženo je bilo 32/12; 1px do 4px odstupanja dolazi
+od `line-height` (leading) fonta, ne od `padding`-a, i nije vizuelno
+primetno. Pravilo je van bilo kog media upita, pa važi svuda (`OBA` iz
+zahteva).
 
 ### Editor komentara
 
@@ -358,9 +435,61 @@ Prag je 4.5:1 za tekst do 24px, 3:1 iznad. Gde ne prolazi, potamni boju teksta u
 
 Faze 0 do 3 su mehaničke i mogu brzo. Faze 4 do 7 traže odluke — posle svake mi javi šta si uradio pre nego što nastaviš.
 
+## Istraga: "Cracks" — zlatna crtica u listi naspram DRAFT/IDEA u detalju
+
+Nije menjano u kodu — samo pročitano, na traženje vlasnika.
+
+U detalju pesme postoje dva ODVOJENA, namerno različita polja, oba
+prikazana kao bedž:
+
+- **`s.status`** (`draft` / `production` / `final`) — pokreće i zlatnu/sivu/
+  zelenu crticu u glavnoj bočnoj listi (`.song-item::before`,
+  `status-production` → `--gold`) I prvi bedž u detalju
+  (`statusLabel()` → "Draft" / "In production" / "Final", ispisano velikim
+  slovima kroz `.badge{text-transform:uppercase}` → "DRAFT").
+- **`s.pipelineStatus`** (`idea` / `draft-lyrics` / `demo` / `recording` /
+  `mix` / `master` / `distributed`) — pokreće SAMO drugi bedž u detalju
+  (`pipelineLabel()`, podrazumevano "Idea" ako polje nije postavljeno →
+  "IDEA"). Album tracklist prikaz (`.track-row`) uopšte nema statusnu
+  crticu, samo ovaj pipeline bedž — potvrđeno u `styles.css`, nema
+  `::before` pravila za `.track-row`.
+
+Ovo samo po sebi nije bag — dva bedža su dva različita polja po dizajnu.
+
+**Ali:** i zlatna crtica u glavnoj listi I prvi bedž u detalju čitaju ISTO
+polje (`s.status`). Ako lista za "Cracks" pokazuje zlatnu (`production`)
+crticu, a detalj pokazuje "DRAFT", to znači da `s.status` u tom trenutku
+NIJE isti na oba mesta — a oba čitaju isti objekat iz istog `catalog` niza
+u memoriji, pa razlika ne može doći iz koda koji sam pregledao. Mogući
+uzroci van koda: dva različita zapisa pesme sa istim nazivom "Cracks" u
+Firestore-u, ili je status promenjen u međuvremenu pa lista prikazuje
+stariji render koji nije osvežen. Nisam mogao dalje da proverim bez
+pristupa Firestore-u — ako želiš, mogu privremeno da dodam `console.log`
+za `s.status`/`s.pipelineStatus` pri otvaranju pesme da uhvatimo tačnu
+vrednost uživo.
+
 ## Stanje
 
 *(ažurirano 2026-09-20.)*
+
+### Deset stavki, detalj + Perform prikaz (ova sesija)
+
+Testirano u browseru na 390px i na širokom desktop ekranu (izolovani test
+sa pravim `styles.css`, pošto app zahteva Firebase login pa se ne može
+testirati direktno kroz app):
+
+1. `--t-lyric: 19px` za tekst pesme iznad 900px (bilo `--t-body`=15px), prored ostaje 1.7 — izmereno 19px/32.3px line-height na 1400px ekranu
+2. `.lyrics{max-width:480px}` — proveren u izolovanom testu, već je ispravan (tačno 480px na 1400px ekranu). **Otvoreno:** vlasnik na živom sajtu i dalje vidi tekst kako se pruža preko 600px — ili je test premalo verodostojan, ili u pravoj aplikaciji nešto drugo pobeđuje. Vlasnik proverava direktno u bazi.
+3. `.cover-img{max-height:380px}` → `320px` (desktop)
+4. `.specs` 4 kolone u jedan red iznad 900px (bilo `repeat(3,1fr)` svuda)
+5. mobilni omot: prvi pokušaj `object-fit:contain` je ostavljao prazne trake kod nepodudarnog odnosa stranica; pošto su omoti kvadratni, konačno rešenje je `aspect-ratio: 1/1` (bez `max-height`) uz `object-fit: cover` vraćen — kvadratni okvir + kvadratna slika = ništa se ne seče. Testirano kvadratnom test-slikom (500×500) sa oznakama na sve četiri ivice.
+6. sadržajni "Copy lyrics"/"Print lyrics" (`.lyric-actions`) sakriveni na mobilnom — traka i "..." meni ih već imaju
+7. sadržajna "Edit"/"Delete" dugmad sakrivena na mobilnom — ostaje samo Perform gore
+8. `.spec` kartice: `min-height:64px` + `-webkit-line-clamp:2` na Genre vrednosti, umesto loma u tri reda
+9. razmak oznake sekcije u Perform-u: `padding: var(--s2) 0 var(--s5)` — izmereno 36px iznad / 13px ispod (traženo 32/12)
+10. istraga statusa "Cracks" — namerno odloženo, vlasnik sam proverava u bazi
+
+Sve promene su samo u `styles.css`.
 
 ### Šta je pushovano
 

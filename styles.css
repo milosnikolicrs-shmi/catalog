@@ -42,6 +42,7 @@
     --t-h3: 22px;
     --t-h2: 30px;
     --t-h1: 42px;
+    --t-lyric: 19px;
 
     /* ── RADII ── */
     --r-sm: 8px;
@@ -621,7 +622,7 @@
   .cover-block { margin-bottom: var(--s5); }
   .cover-img {
     width: 100%;
-    max-height: 380px;
+    max-height: 320px;
     object-fit: cover;
     border-radius: var(--r-lg);
     display: block;
@@ -716,6 +717,16 @@
     font-size: var(--t-micro);
     letter-spacing: 0.14em;
     text-transform: uppercase;
+  }
+  /* Desktop only: lyrics were too small at --t-body (15px), and BPM/Key/
+     Duration/Genre wrapped to a 3-plus-1 layout leaving dead space next to
+     Genre. Scoped to >900px so the mobile/tablet single-column layout is
+     untouched. Placed after the base .lyrics/.specs rules so it actually
+     wins the cascade instead of being overridden by them (same
+     specificity, later source order wins regardless of the media match). */
+  @media (min-width: 901px) {
+    .lyrics { font-size: var(--t-lyric); }
+    .specs { grid-template-columns: repeat(4, 1fr); }
   }
 
   .text-block {
@@ -1222,7 +1233,12 @@
     display: flex;
     flex-direction: column;
     gap: var(--s3);
-    padding: var(--s5) 0;
+    /* Asymmetric on purpose: the label should read as belonging to the
+       stanza below it, not floating between two stanzas. Below-label gap
+       is the flex `gap` above (--s3, 12px); above-label gap is this
+       section's own top padding + the previous section's bottom padding
+       + the 1px border between them (--s2 + --s5 + 1 ≈ 32px). */
+    padding: var(--s2) 0 var(--s5);
     border-bottom: 1px solid var(--hairline);
   }
   .perf-label-wrap { width: auto; }
@@ -1433,9 +1449,18 @@
     .detail-head { flex-direction: column; gap: var(--s3); }
     .detail-actions { padding-top: 0; width: 100%; }
     .detail-actions .icon-btn { flex: 1; min-height: 44px; }
+    /* Edit and Delete duplicate the floating bar (song detail) and the
+       "..." menu — keep only Perform in the top row on mobile. */
+    .detail-actions .icon-btn:not(:first-child) { display: none; }
 
-    .spec { padding: var(--s3) var(--s2); }
-    .spec .v { font-size: var(--t-caption); }
+    .spec { padding: var(--s3) var(--s2); min-height: 64px; }
+    .spec .v {
+      font-size: var(--t-caption);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
 
     .album-header { flex-direction: column; }
     .album-header .cover-img { max-width: 100%; }
@@ -1443,11 +1468,17 @@
     .row3, .row2 { grid-template-columns: 1fr; }
 
     .lyric-head { flex-direction: column; align-items: flex-start; gap: var(--s2); }
-    .lyric-actions { width: 100%; }
-    .lyric-actions .mini-btn { flex: 1; min-height: 44px; }
+    /* Copy lyrics duplicates the floating bar, Print lyrics duplicates the
+       "..." menu — the content row is redundant on mobile. */
+    .lyric-actions { display: none; }
     .lyrics { font-size: var(--t-body); }
 
-    .cover-img { max-height: 300px; }
+    /* Covers are square — force a 1:1 box instead of capping height on a
+       box whose width:100% ratio doesn't match, which is what forced
+       object-fit:cover to crop the artwork (including text baked into
+       it) top and bottom. With a matching aspect-ratio, cover has nothing
+       to crop. */
+    .cover-img { aspect-ratio: 1 / 1; max-height: none; object-fit: cover; }
     .suno-block { padding-right: var(--s4); padding-top: var(--s7); }
 
     .analysis-head { flex-direction: column; align-items: stretch; }
