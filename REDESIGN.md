@@ -224,6 +224,34 @@ Umesto jednog fiksnog rasporeda, tri praga:
 Prelaz između 600px i 900px, i između 900px i preko, mora da bude čist kad
 se iPad rotira iz uspravnog u položeni položaj — proveri oba pravca.
 
+### Traka za skok na sekciju — dinamično aktivno stanje
+
+Traka prati koju sekciju korisnik trenutno čita, preko `IntersectionObserver`
+(ne scroll listener-a) nad oznakama sekcija (`.perf-section`), sa `root`
+postavljenim na `#perfOverlay` i `rootMargin: '-10% 0px -70% 0px'` (traka
+čitanja u gornjoj trećini ekrana). Dva ispravljena problema:
+
+- **Koje dugme se pali:** posmatrač drži `intersectionRatio` svake sekcije u
+  mapi koja preživljava između poziva callback-a i bira sekciju sa najvećim
+  odnosom kao aktivnu, umesto da samo uključi poslednji unos iz trenutnog
+  paketa entry-ja. Prvobitna verzija je to radila naivno
+  (`entries.forEach(...)` uključi dugme za svaki entry koji trenutno preseca
+  traku i pritom isključi sva ostala) — kad dve susedne kratke sekcije
+  istovremeno seku traku čitanja (čest slučaj s kratkim Intro/Outro
+  sekcijama), pobeđivalo je šta god je poslednje u paketu, ne ona koja
+  stvarno dominira trakom. `threshold: [0, 0.1, 0.25, 0.5, 0.75, 1]` daje
+  dovoljno tačaka da se odnos prati glatko tokom skrola.
+- **Kad aktivno dugme izađe iz vidljivog dela trake:** kad se aktivna sekcija
+  promeni, aktivno dugme se dovodi u vidno polje sa
+  `scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })`
+  (`block: 'nearest'` da ne pokuša i vertikalni skrol cele stranice, samo
+  horizontalni unutar `.perf-jump`).
+
+Testirano skrolovanjem kroz celu pesmu (deset sekcija, uključujući kratak
+Intro i Outro) na 390px širine: aktivno dugme ide redom 0→1→2→...→N bez
+preskakanja i bez vraćanja na pogrešnu sekciju, traka se pomera da prati
+aktivno dugme. Kod: `index.html`, `setupPerfJumpObserver()`.
+
 ### Editor komentara
 
 Format čuvanja ostaje isti: `stih | komentar`, sekcije `[Chorus] (hint)`. Menja se samo prikaz.
@@ -351,6 +379,24 @@ Perform) na stvarnom telefonu, ne samo u simuliranom viewport-u.
   stvarno napravljena, mobilna vrednost od 70px se pokazala nedovoljnom —
   stvarni otisak trake je `bottom(30px) + visina(56px)` ≈ 86px plus sigurnosna
   zona uređaja. Ispravljeno na `calc(102px + env(safe-area-inset-bottom))`.
+- **Traka niže, bliže Apple Music razmaku** (posle spajanja): `.mobile-bar`
+  je sedela previsoko — `bottom: calc(30px + safe-area)` ostavljao je veliki
+  razmak do sistemske crtice na iPhone-u. Promenjeno na
+  `calc(12px + env(safe-area-inset-bottom))`, tako da traka sedi tik iznad
+  sistemske crtice (12px na uređajima bez crtice). `--clearance` je pratio
+  razliku dole: `12 + 56 (visina trake) + 16 (vazduh) = 84px`, pa
+  `--clearance: calc(84px + env(safe-area-inset-bottom))` (bilo 102px).
+  Isti tretman na Perform ekranu: `.perf-jump` sa `bottom: 24px` (bez
+  sigurnosne zone uopšte — bio bi propust na uređajima sa crticom) postaje
+  `calc(12px + env(safe-area-inset-bottom))`; `.perf-inner`-ov donji padding
+  ide sa 100px na `calc(80px + env(safe-area-inset-bottom))`
+  (`12 + 54 (izmerena visina trake, sa ivicom) + ~14 vazduha`).
+  Izmereno u browseru na 390×844 (bez safe-area, tj. uređaj bez crtice):
+  `.mobile-bar` bottom 12px, visina 56px, razmak do dna ekrana 12px,
+  `.song-list` padding-bottom 84px (razmak iznad trake 16px); `.perf-jump`
+  bottom 12px, visina 54px, `.perf-inner` padding-bottom 80px (razmak iznad
+  trake ~14px). Na uređaju sa sigurnosnom zonom (npr. 34px) oba razmaka rastu
+  za tu vrednost jer je ona u istoj `calc()` na obe strane.
 - **`--gold-text`** (Provera pre spajanja): nova promenljiva, definisana samo
   u `body.light` kao `#7e6534`, korišćena isključivo tamo gde je `--gold`
   sitan čitljiv tekst (section-label, perf-label, detail-track-num, bedževi,

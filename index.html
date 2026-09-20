@@ -64,7 +64,7 @@
       <button class="btn" onclick="openExport()">Export</button>
     </div>
     <div class="sidebar-foot theme-foot">
-      <button class="btn theme-btn" onclick="toggleTheme()"><span id="themeIcon">&#9789;</span> <span id="themeLabel">Light mode</span></button>
+      <button class="btn theme-btn" onclick="toggleTheme()"><span id="themeIcon"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 10.5A6.5 6.5 0 1 1 7.5 3a5 5 0 0 0 7.5 7.5Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span> <span id="themeLabel">Light mode</span></button>
       <button class="btn" onclick="signOutNow()" title="Sign out"><span>Sign out</span></button>
     </div>
   </aside>
@@ -155,6 +155,13 @@ function confirmDiscard() {
 // re-attached if a different user signs back in.
 let unsubSongs = null, unsubAlbums = null;
 let fsStarted = false;
+
+// ── ICONS (inline SVG, outline style: stroke=currentColor so buttons'
+// existing color/hover CSS controls them, no emoji font substitution) ──
+const ICON_SEARCH = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.6"/><path d="M12.5 12.5L16 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+const ICON_COPY = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4.5" y="4" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7 4V3.2C7 2.5 7.6 2 8.3 2h1.4c.7 0 1.3.5 1.3 1.2V4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_SUN = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="9" r="3.5" stroke="currentColor" stroke-width="1.6"/><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M9 1.5v2"/><path d="M9 14.5v2"/><path d="M1.5 9h2"/><path d="M14.5 9h2"/><path d="M3.8 3.8l1.4 1.4"/><path d="M12.8 12.8l1.4 1.4"/><path d="M3.8 14.2l1.4-1.4"/><path d="M12.8 5.2l1.4-1.4"/></g></svg>';
+const ICON_MOON = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 10.5A6.5 6.5 0 1 1 7.5 3a5 5 0 0 0 7.5 7.5Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 function stopFirestore() {
   if (unsubSongs) { unsubSongs(); unsubSongs = null; }
@@ -324,7 +331,7 @@ function renderSidebar() {
       const num = String(idx).padStart(2, '0');
       html += `<div class="song-item-wrap">
         <div class="song-item-actions">
-          <button type="button" class="song-item-action" onclick="quickCopyLyrics('${jsAttr(s.id)}')" aria-label="Copy lyrics">&#128203;</button>
+          <button type="button" class="song-item-action" onclick="quickCopyLyrics('${jsAttr(s.id)}')" aria-label="Copy lyrics">${ICON_COPY}</button>
           <button type="button" class="song-item-action" onclick="quickCycleStatus('${jsAttr(s.id)}')" aria-label="Change status">&#8635;</button>
         </div>
         <button type="button" class="song-item status-${s.status || 'draft'} ${s.id === currentId ? 'active' : ''}" onclick="selectSong('${jsAttr(s.id)}')" oncontextmenu="return songRowContextMenu(event,'${jsAttr(s.id)}')">
@@ -812,7 +819,7 @@ function openPerfView() {
         <button class="perf-btn" onclick="perfFont(-1)">A−</button>
         <button class="perf-btn" onclick="perfFont(1)">A+</button>
         <button id="perfNotesToggle" class="perf-btn ${perfNotesVisible ? 'on' : ''}" onclick="togglePerfNotes()">Comments</button>
-        <button class="perf-btn" onclick="toggleTheme()">☾ / ☀</button>
+        <button class="perf-btn" style="display:inline-flex;align-items:center;gap:4px;" onclick="toggleTheme()">${ICON_MOON} / ${ICON_SUN}</button>
         <button class="perf-btn" onclick="editPerfSheet()">Edit</button>
         <button class="perf-btn" onclick="goBack()">✕ Close</button>
       </div>
@@ -842,13 +849,38 @@ function setupPerfJumpObserver() {
   const sectionEls = [...document.querySelectorAll('.perf-section')];
   const jumpBtns = [...document.querySelectorAll('.perf-jump-btn')];
   if (!sectionEls.length || !jumpBtns.length) return;
+  // Track each section's intersection ratio with the reading band, not just
+  // the entries in a given callback batch: when two adjacent short sections
+  // both overlap the band at once, picking "whichever entry came last" (the
+  // previous approach) picked whichever happened to sort last, not the one
+  // actually dominating the band. Keeping a persistent ratio per section and
+  // choosing the max each time makes the active pick deterministic.
+  const ratios = new Map();
+  let activeIdx = null;
+  const setActive = (idx) => {
+    if (idx === activeIdx) return;
+    activeIdx = idx;
+    let activeBtn = null;
+    jumpBtns.forEach(b => {
+      const on = b.dataset.jump === idx;
+      b.classList.toggle('on', on);
+      if (on) activeBtn = b;
+    });
+    activeBtn?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  };
   perfSectionObserver = new IntersectionObserver(entries => {
     entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
       const idx = entry.target.id.replace('perf-sec-', '');
-      jumpBtns.forEach(b => b.classList.toggle('on', b.dataset.jump === idx));
+      ratios.set(idx, entry.isIntersecting ? entry.intersectionRatio : 0);
     });
-  }, { root, rootMargin: '-10% 0px -70% 0px', threshold: 0 });
+    let bestIdx = null, bestRatio = 0;
+    sectionEls.forEach(el => {
+      const idx = el.id.replace('perf-sec-', '');
+      const r = ratios.get(idx) || 0;
+      if (r > bestRatio) { bestRatio = r; bestIdx = idx; }
+    });
+    if (bestIdx !== null) setActive(bestIdx);
+  }, { root, rootMargin: '-10% 0px -70% 0px', threshold: [0, 0.1, 0.25, 0.5, 0.75, 1] });
   sectionEls.forEach(el => perfSectionObserver.observe(el));
 }
 
@@ -1589,7 +1621,7 @@ function renderMobileBar() {
   } else {
     bar.classList.add('visible');
     bar.innerHTML = `
-      <button type="button" class="mobile-bar-icon" onclick="focusMobileSearch()" aria-label="Search">&#128269;</button>
+      <button type="button" class="mobile-bar-icon" onclick="focusMobileSearch()" aria-label="Search">${ICON_SEARCH}</button>
       <button type="button" class="mobile-bar-primary" onclick="newSong()">+ New song</button>
       <button type="button" class="mobile-bar-icon" onclick="openMobileMore()" aria-label="More">&#8942;</button>`;
   }
@@ -1611,7 +1643,7 @@ function openMobileMore() {
     body.innerHTML = `
       <button type="button" class="mobile-more-item" onclick="closeMobileMore();openImport();">Import</button>
       <button type="button" class="mobile-more-item" onclick="closeMobileMore();openExport();">Export</button>
-      <button type="button" class="mobile-more-item" onclick="closeMobileMore();toggleTheme();">${lightMode ? '☾ Dark mode' : '☀ Light mode'}</button>
+      <button type="button" class="mobile-more-item" style="gap: var(--s2);" onclick="closeMobileMore();toggleTheme();">${lightMode ? ICON_MOON + ' Dark mode' : ICON_SUN + ' Light mode'}</button>
       <button type="button" class="mobile-more-item danger" onclick="closeMobileMore();signOutNow();">Sign out</button>`;
   }
   document.getElementById('mobileMoreMenu').classList.add('visible');
@@ -1644,7 +1676,7 @@ async function quickCycleStatus(id) {
 let lightMode = localStorage.getItem('shmi_theme') === 'light';
 function applyTheme() {
   document.body.classList.toggle('light', lightMode);
-  document.getElementById('themeIcon').innerHTML = lightMode ? '&#9728;' : '&#9789;';
+  document.getElementById('themeIcon').innerHTML = lightMode ? ICON_SUN : ICON_MOON;
   document.getElementById('themeLabel').textContent = lightMode ? 'Dark mode' : 'Light mode';
 }
 // ── SIDEBAR COLLAPSE ───────────────────────────────────────────────
