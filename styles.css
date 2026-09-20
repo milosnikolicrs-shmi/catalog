@@ -725,7 +725,7 @@
      wins the cascade instead of being overridden by them (same
      specificity, later source order wins regardless of the media match). */
   @media (min-width: 901px) {
-    .lyrics { font-size: var(--t-lyric); }
+    .lyrics { font-size: var(--t-lyric); margin-inline: 0; }
     .specs { grid-template-columns: repeat(4, 1fr); }
   }
 

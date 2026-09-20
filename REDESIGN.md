@@ -155,6 +155,19 @@ desktopu. Dodata `--t-lyric: 19px` u `:root`, primenjena samo iznad 900px
 prored ostaje 1.7 (`line-height` se ne menja, samo `font-size`). Ispod 900px
 ostaje kako je bilo (15px do 760px, pa 21px ispod 600px iz Faze 5).
 
+**Dopuna 2 — centriranje je bio pravi problem:** `max-width:480px` je bio
+tačan, ali blok je imao `margin: 0 auto` (centriran u svom delu mreže).
+Na širokom ekranu deo mreže za tekst (`.song-grid-main`) je širi od 480px
+(npr. 593px na 1400px), pa je centriran blok počinjao vidno desno od
+kartica BPM/Key/Duration/Genre iznad njega — 56px razlike na 1400px, više
+na širim ekranima. To je bio stvaran vizuelni problem, ne greška u meri.
+Ispravljeno u istom `@media (min-width: 901px)` upitu: `margin-inline: 0`
+umesto centriranja — leva ivica bloka je sad poravnata sa levom ivicom
+kartica, `text-align: center` unutar bloka ostaje (sam tekst je i dalje
+centriran, menja se samo gde blok stoji). Ispod 900px ostaje `margin: 0
+auto` (tamo je kontejner obično uži od 480px pa se margine svakako svode
+na 0).
+
 ### Raspored
 
 Mreža od pet kolona: tekst zauzima tri, desna kolona dve.
@@ -479,7 +492,7 @@ sa pravim `styles.css`, pošto app zahteva Firebase login pa se ne može
 testirati direktno kroz app):
 
 1. `--t-lyric: 19px` za tekst pesme iznad 900px (bilo `--t-body`=15px), prored ostaje 1.7 — izmereno 19px/32.3px line-height na 1400px ekranu
-2. `.lyrics{max-width:480px}` — proveren u izolovanom testu, već je ispravan (tačno 480px na 1400px ekranu). **Otvoreno:** vlasnik na živom sajtu i dalje vidi tekst kako se pruža preko 600px — ili je test premalo verodostojan, ili u pravoj aplikaciji nešto drugo pobeđuje. Vlasnik proverava direktno u bazi.
+2. **Rešeno — razjašnjeno nesporazumom, ne bagom:** `max-width:480px` je uvek bio ispravan (potvrđeno merenjem, tačno 480px). Ono što NIJE bilo u redu je `margin: 0 auto` (centriranje) — 480px centrirano u širem delu mreže (npr. 593px na 1400px ekranu) znači da tekst počinje ~56px desno od leve ivice BPM/Key/Duration/Genre kartica iznad njega, što se vizuelno čita kao "tekst beži udesno" iako je tehnički unutar 480px. Ispravljeno iznad 900px: `margin-inline: 0` umesto `0 auto` — leva ivica bloka sa stihovima sad je poravnata sa levom ivicom kartica (`text-align:center` unutar bloka ostaje, menja se samo pozicija samog bloka, ne poravnanje teksta u njemu). Izmereno na 1400px: `.lyrics` levo = 340px, kartica BPM levo = 340px — identično. Ispod 900px (kolona je uska, `.song-grid` u jednoj koloni) ostaje `0 auto` netaknuto — tamo je kontejner uglavnom uži od 480px pa se margine i onako svode na 0.
 3. `.cover-img{max-height:380px}` → `320px` (desktop)
 4. `.specs` 4 kolone u jedan red iznad 900px (bilo `repeat(3,1fr)` svuda)
 5. mobilni omot: prvi pokušaj `object-fit:contain` je ostavljao prazne trake kod nepodudarnog odnosa stranica; pošto su omoti kvadratni, konačno rešenje je `aspect-ratio: 1/1` (bez `max-height`) uz `object-fit: cover` vraćen — kvadratni okvir + kvadratna slika = ništa se ne seče. Testirano kvadratnom test-slikom (500×500) sa oznakama na sve četiri ivice.
