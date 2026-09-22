@@ -632,3 +632,23 @@ Perform) na stvarnom telefonu, ne samo u simuliranom viewport-u.
   sidebar-foot (+ New song/Import/Export/tema/odjava), ali sama Faza 5 nije
   eksplicitno tražila da se sidebar-foot sakrije — samo da traka postoji.
   Posledica: oba su se prikazivala istovremeno na mobilnom. Dodato naknadno.
+- **Optimizacija učitavanja** (posle redizajna):
+  - Slike izvučene iz `index.html` u fajlove u korenu: `logo.png` (bio
+    ugrađen tri puta), `apple-touch-icon.png`, `icon-192.png`,
+    `icon-512.png`, a manifest iz `data:` URL-a u `manifest.json`.
+    `index.html`: 266,150 → 100,258 bajtova (gzip: 135,506 → 26,928).
+  - Firestore sada koristi `persistentLocalCache` (IndexedDB, više tabova):
+    pri ponovnom otvaranju listeneri kreću od lokalne kopije i sa mreže
+    stižu samo izmenjene pesme. Napomena: podaci ostaju u IndexedDB-u na
+    uređaju i posle odjave.
+  - Novo polje `coverThumb` (96px JPEG, ~6 KB) pravi se pri čuvanju omota
+    i koristi u listi; pesme bez njega koriste pun omot (bez migracije).
+    Uvoz prenosi `coverThumb` ako ga JSON ima. `coverThumb` smanjuje
+    dekodiranje u listi, ali NE i preuzimanje: pun omot je i dalje u istom
+    Firestore dokumentu, pa se preuzima zajedno sa pesmom. Za to bi omot
+    morao u zaseban dokument ili Firebase Storage — nije rađeno.
+  - `--draft` u tamnom režimu `#6f695e` → `#6b6b6b` na zahtev vlasnika
+    (izuzetak od pravila "paleta se ne menja"): topli sivo-braon je na
+    tamnoj pozadini ličio na zlatnu `prod` crticu. Kontrast prema `--bg`
+    3.61 → 3.69:1 (prag za statusnu grafiku 3:1). Svetli `--draft`
+    (`#a29b8b`) nije diran.
